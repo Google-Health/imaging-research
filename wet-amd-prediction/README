@@ -1,0 +1,7 @@
+# Wet AMD prediction network architecture code
+
+This repo contains an implementation of the exAMD prediction network described in Yim J. et al. (2020) "Predicting conversion to wet age related macular
+degeneration using deep learning", Nature Medicine doi:10.1038/s41591-020-0867-7.
+
+Note this code illustrates only the network architecture and does not contain any data or training code.
+

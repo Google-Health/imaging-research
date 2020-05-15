@@ -1,6 +1,0 @@
-# Exudative AMD prediction network architecture code
-
-This repo contains an implementation of the exAMD prediction network described in "Predicting exudative conversion in age related macular degeneration using deep learning" Yim & Chopra et al (tbc).
-
-Note this code illustrates only the network architecture and does not contain any data or training code.
-
