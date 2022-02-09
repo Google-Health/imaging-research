@@ -1,6 +1,6 @@
 # CXR Embeddings
 
-Chest x-ray (CXR) embeddings are n-dimensional vectors (of floating points between -1.0 and 1.0) representing a projection of the original image into a compressed feature space.
+Chest x-ray (CXR) embeddings are n-dimensional vectors (of floating points numbers) representing a projection of the original image into a compressed feature space.
 
 These embeddings can be used to train small models such as linear probes or multilayer perceptrons (MLPs) to achieve high performance on classification tasks, sometimes at near-expert level.
 
