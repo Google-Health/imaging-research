@@ -44,7 +44,7 @@ _RETRIABLE_TYPES = (
    exceptions.ServiceUnavailable,  # 503
 )
 
-_METRICS_NAMESPACE = 'superrad'
+_METRICS_NAMESPACE = 'cxr-embeddings'
 
 
 def _is_retryable(exc):
