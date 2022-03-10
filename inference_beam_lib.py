@@ -1,33 +1,20 @@
 #!/usr/bin/python
 #
-# Copyright (c) 2022, Google LLC
-# All rights reserved.
+# Copyright 2022 Google LLC
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#    This product includes software developed by Google LLC.
-# 4. Neither the name of the Google LLC nor the
-#    names of its contributors may be used to endorse or promote products
-#    derived from this software without specific prior written permission.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# THIS SOFTWARE IS PROVIDED BY Google LLC ''AS IS'' AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL Google LLC BE LIABLE FOR ANY
-# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import base64
+import contextlib
 import googleapiclient
 import http
 from apache_beam.utils import retry
@@ -64,72 +51,71 @@ from google.protobuf.struct_pb2 import Value
 
 from typing import Any, Iterable, List, Mapping, Optional, Sequence, Text, Tuple, TypeVar, Union
 
+GCS_PREFIX = 'gs://'
 LOCATION = 'us-central1'
 
 _RETRIABLE_TYPES = (
-   exceptions.TooManyRequests,  # 429
-   exceptions.InternalServerError,  # 500
-   exceptions.BadGateway,  # 502
-   exceptions.ServiceUnavailable,  # 503
+    exceptions.TooManyRequests,  # 429
+    exceptions.InternalServerError,  # 500
+    exceptions.BadGateway,  # 502
+    exceptions.ServiceUnavailable,  # 503
 )
 
 _METRICS_NAMESPACE = 'cxr-embeddings'
 
 
 def _is_retryable(exc):
-    return isinstance(exc, _RETRIABLE_TYPES)
+  return isinstance(exc, _RETRIABLE_TYPES)
 
 
-def _parse_gcs_uri(gcs_uri: str):
-  match = re.match('gs://([^\/]+)/(.*)', gcs_uri)
-  bucket_name = match.group(1)
-  filename = match.group(2)
-  return bucket_name, filename
+def _image_id_to_filebase(image_id: str) -> str:
+  filebase, _ = os.path.splitext(os.path.basename(image_id))
+  return filebase
 
 
+@contextlib.contextmanager
+def _open(path, *args, **kwargs):
+  if path.startswith(GCS_PREFIX):
+    f = beam.io.gcp.gcsio.GcsIO().open(path, *args, **kwargs)
+  else:
+    f = os.open(path, *args, **kwargs)
+  yield f
+  f.close()
+
+
+@beam.typehints.with_input_types(str)
+@beam.typehints.with_output_types(Optional[tf.train.Example])
 class CreateExampleDoFn(beam.DoFn):
 
-    def __init__(self, project=None, output_path: Optional[str] = None):
-        self._project = project
-        self._output_bucket = None
-        self._output_path = None
-        if output_path:
-          self._output_bucket, _ = _parse_gcs_uri(output_path)
-          self._output_path = output_path
+  def __init__(self, output_path: Optional[str] = None):
+    self._output_path = output_path
 
-    def process(self, element):
-        uri, split, label = element
-        if label is not None:
-            label = int(label)
-        example = tf.train.Example()
-        # TODO(asellerg): take in user project.
-        client = storage.Client(project=self._project)
-        if self._output_path:
-          image_id, _ = os.path.splitext(os.path.basename(uri))
-          folder = self._output_path[len(f'gs://{self._output_bucket}/'):]
-          filename = f'{folder}/{split}/{image_id}.tfrecord'
-          blob = client.bucket(self._output_bucket).blob(filename)
-          if blob.exists():
-            example = tf.train.Example()
-            with tempfile.NamedTemporaryFile(delete=False) as f:
-              blob.download_to_file(f)
-            for serialized_example in tf.python_io.tf_record_iterator(f.name):
-              example.ParseFromString(serialized_example)
-            if 'representation' in example.features.feature and example.features.feature['representation'].float_list.value:
-              beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'output-file-exists').inc()
-              return tf.train.Example()
-            else:
-              blob.delete()
-        bucket_name, filename = _parse_gcs_uri(uri)
-        bucket = client.bucket(bucket_name, user_project=self._project)
-        blob = bucket.blob(filename)
-        example.features.feature['label'].int64_list.value[:] = [label]
-        example.features.feature['split'].bytes_list.value[:] = [six.ensure_binary(split)]
-        example.features.feature['image/id'].bytes_list.value[:] = [six.ensure_binary(uri)]
-        example.features.feature['image/encoded'].bytes_list.value[:] = [blob.download_as_bytes()]
-        yield example
+  def process(self, uri: str):
+    if self._output_path:
+      exists = False
+      filebase = _image_id_to_filebase(uri)
+      filename = f'{self._output_path}/{filebase}.tfrecord'
+      if self._output_path.startswith(GCS_PREFIX):
+        exists = beam.io.gcp.gcsio.GcsIO().exists(filename)
+      else:
+        exists = os.path.exists(filename)
+      if exists:
+        beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
+                                     'output-file-exists').inc()
+        return
+    example = tf.train.Example()
+    with _open(uri, 'r') as f:
+      example.features.feature['image/id'].bytes_list.value[:] = [
+          six.ensure_binary(uri)
+      ]
+      example.features.feature['image/encoded'].bytes_list.value[:] = [
+          f.read()
+      ]
+    yield example
 
 
+@beam.typehints.with_input_types(Optional[tf.train.Example])
+@beam.typehints.with_output_types(Optional[tf.train.Example])
 class GenerateEmbeddingsDoFn(beam.DoFn):
   """A DoFn that generates embeddings from a cloud-hosted TensorFlow model."""
 
@@ -138,24 +124,23 @@ class GenerateEmbeddingsDoFn(beam.DoFn):
     self._endpoint_id = endpoint_id
     self._skip_errors = skip_errors
 
-  def _make_instances(
-      self,
-      serialized_example: bytes
-      )-> List[Mapping[Text, Any]]:
+  def _make_instances(self,
+                      serialized_example: bytes) -> List[Mapping[Text, Any]]:
     return [{'b64': base64.b64encode(serialized_example).decode()}]
 
-  def _run_inference(
-      self, serialized_example: bytes
-      ) -> Sequence[Any]:
+  def _run_inference(self, serialized_example: bytes) -> Sequence[float]:
     instances = self._make_instances(serialized_example)
-    api_client = aiplatform.gapic.PredictionServiceClient(client_options=ClientOptions(api_endpoint='us-central1-aiplatform.googleapis.com'))
+    api_client = aiplatform.gapic.PredictionServiceClient(
+        client_options=ClientOptions(
+            api_endpoint='us-central1-aiplatform.googleapis.com'))
     endpoint = api_client.endpoint_path(
-        project=self._project, location=LOCATION, endpoint=self._endpoint_id
-    )
+        project=self._project, location=LOCATION, endpoint=self._endpoint_id)
     retry_policy = Retry(predicate=_is_retryable)
     try:
-      response = api_client.predict(endpoint=endpoint, instances=instances, retry=retry_policy)
-      beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'successful-inference').inc()
+      response = api_client.predict(
+          endpoint=endpoint, instances=instances, retry=retry_policy)
+      beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
+                                   'successful-inference').inc()
     except Exception as e:
       beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'failed-inference').inc()
       if not self._skip_errors:
@@ -163,55 +148,49 @@ class GenerateEmbeddingsDoFn(beam.DoFn):
       return []
     return response.predictions
 
-  def process(
-      self,
-      example: tf.train.Example
-      ) -> Iterable[tf.train.Example]:
-    if 'image/encoded' not in example.features.feature:
-      beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'skipped-inference').inc()
-      return [example]
+  def process(self, example: Optional[tf.train.Example]):
+    if not example or 'image/encoded' not in example.features.feature:
+      beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
+                                   'skipped-inference').inc()
+      return
     serialized_example = example.SerializeToString()
     outputs = self._run_inference(serialized_example)
-    return [self._post_process(serialized_example, outputs)]
+    yield self._post_process(serialized_example, outputs)
 
-  def _post_process(
-      self,
-      serialized_example: bytes,
-      outputs: Sequence[Value]
-      ) -> tf.train.Example:
+  def _post_process(self, serialized_example: bytes,
+                    outputs: Sequence[float]) -> Optional[tf.train.Example]:
     example = tf.train.Example()
     example.ParseFromString(serialized_example)
     if not outputs:
-      return example
+      return
     values = np.array(outputs)
-    example.features.feature['representation'].float_list.value[:] = values.flatten()
+    example.features.feature[
+        'representation'].float_list.value[:] = values.flatten()
     return example
 
 
+@beam.typehints.with_input_types(Optional[tf.train.Example])
+@beam.typehints.with_output_types(np.ndarray)
 class ProcessPredictionDoFn(beam.DoFn):
 
-  def __init__(self, project: str, output_path: Optional[str] = None):
-    self._project = project
-    self._output_bucket = None
-    if output_path:
-      self._output_bucket, _ = _parse_gcs_uri(output_path)
+  def __init__(self, output_path: Optional[str] = None):
     self._output_path = output_path
 
-  def process(self, element: tf.train.Example):
-    if 'representation' not in element.features.feature:
-        beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'missing-representation').inc()
-        return np.array([])
+  def process(self, element: Optional[tf.train.Example]):
+    if not element or 'representation' not in element.features.feature:
+      beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
+                                   'missing-representation').inc()
+      return np.array([])
     del element.features.feature['image/encoded']
-    if self._output_bucket:
-        client = storage.Client(project=self._project)
-        bucket = client.bucket(self._output_bucket)
-        folder = self._output_path[len(f'gs://{self._output_bucket}/'):]
-        split = six.ensure_str(element.features.feature['split'].bytes_list.value[0])
-        filename, _ = os.path.splitext(six.ensure_str(os.path.basename(element.features.feature['image/id'].bytes_list.value[0])))
-        with tempfile.NamedTemporaryFile(delete=False) as f:
-          with tf.io.TFRecordWriter(f.name) as w:
-            w.write(element.SerializeToString())
-        blob = bucket.blob(f'{folder}/{split}/{filename}.tfrecord')
-        blob.upload_from_filename(f.name)
-    yield np.array(element.features.feature['representation'].float_list.value[:])
-
+    if self._output_path:
+      filebase = _image_id_to_filebase(
+          six.ensure_str(
+              element.features.feature['image/id'].bytes_list.value[0]))
+      filename = f'{self._output_path}/{filebase}.tfrecord'
+      with tempfile.NamedTemporaryFile(delete=False) as f:
+        with tf.io.TFRecordWriter(f.name) as w:
+          w.write(element.SerializeToString())
+        with _open(filename, 'w') as o:
+          o.write(f.read())
+    yield np.array(
+        element.features.feature['representation'].float_list.value[:])
