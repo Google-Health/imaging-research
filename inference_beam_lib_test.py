@@ -13,39 +13,99 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import constants
 import unittest
 from unittest import mock
 
 import apache_beam as beam
 from apache_beam.testing import test_pipeline
 from apache_beam.testing import util as test_util
-import tensorflow as tf
+import functools
+import numpy as np
+import os
+import six
+import tempfile
+import tensorflow.compat.v1 as tf
 
 import inference_beam_lib
 
 
-class GenerateEmbeddingsTest(unittest.TestCase):
+class InferenceBeamTestCase(unittest.TestCase):
+
+  def assertMetricsEqual(self, metrics, metric_name, expected):
+    actual = metrics.query(beam.metrics.MetricsFilter().with_name(
+        metric_name))['counters'][0].committed
+    self.assertEqual(expected, actual)
+
+
+class CreateExampleTest(InferenceBeamTestCase):
+
+  def setUp(self):
+    self._output_path = tempfile.TemporaryDirectory()
+    with tempfile.NamedTemporaryFile('wb', delete=False) as f:
+      self._input_file = f.name
+      f.write(b'PNGblahblahblah')
+
+  def tearDown(self):
+    self._output_path.cleanup()
+
+  def test_success(self):
+    expected = tf.train.Example()
+    expected.features.feature[constants.IMAGE_KEY].bytes_list.value[:] = [
+        b'PNGblahblahblah'
+    ]
+    expected.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
+        six.ensure_binary(self._input_file)
+    ]
+    with test_pipeline.TestPipeline() as p:
+      input = p | beam.Create([self._input_file])
+      output = input | beam.ParDo(
+          inference_beam_lib.CreateExampleDoFn(self._output_path.name))
+      result = p.run()
+      test_util.assert_that(output, test_util.equal_to([expected]))
+
+  def test_already_existing(self):
+    expected = tf.train.Example()
+    expected.features.feature[constants.IMAGE_KEY].bytes_list.value[:] = [
+        b'PNGblahblahblah'
+    ]
+    expected.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
+        six.ensure_binary(self._input_file)
+    ]
+    filebase = inference_beam_lib._image_id_to_filebase(self._input_file)
+    with open(
+        os.path.join(self._output_path.name, f'{filebase}.tfrecord'), 'w') as f:
+      f.write('Output file already exists.')
+    with test_pipeline.TestPipeline() as p:
+      input = p | beam.Create([self._input_file])
+      output = input | beam.ParDo(
+          inference_beam_lib.CreateExampleDoFn(self._output_path.name))
+      result = p.run()
+      test_util.assert_that(output, test_util.equal_to([]))
+      self.assertMetricsEqual(result.metrics(), 'output-file-exists', 1)
+
+
+class GenerateEmbeddingsTest(InferenceBeamTestCase):
 
   def setUp(self):
     self._input_example = tf.train.Example()
-    self._input_example.features.feature['image/encoded'].bytes_list.value[:] = [b'PNGblahblahblah']
-
-  def assertMetricsEqual(self, metrics, metric_name, expected):
-    actual = metrics.query(beam.metrics.MetricsFilter().with_name(metric_name))['counters'][0].committed
-    self.assertEqual(expected, actual)
+    self._input_example.features.feature[
+        constants.IMAGE_KEY].bytes_list.value[:] = [b'PNGblahblahblah']
 
   @mock.patch('google.cloud.aiplatform.gapic.PredictionServiceClient')
   def test_success(self, mock_api_client):
-    mock_api_client.return_value.predict.return_value.predictions = [1.0, 0.0, 3.0]
+    mock_api_client.return_value.predict.return_value.predictions = [
+        1.0, 0.0, 3.0
+    ]
     with test_pipeline.TestPipeline() as p:
       input = p | beam.Create([self._input_example])
       output = input | beam.ParDo(
-          inference_beam_lib.GenerateEmbeddingsDoFn('project', 'endpoint')) | beam.FlatMap(
-              lambda x: x.features.feature['representation'].float_list.value)
+          inference_beam_lib.GenerateEmbeddingsDoFn(
+              'project',
+              'endpoint')) | beam.FlatMap(lambda x: x.features.feature[
+                  constants.EMBEDDING_KEY].float_list.value)
       result = p.run()
-      test_util.assert_that(
-          output,
-          test_util.equal_to([1.0, 0.0, 3.0]))
+      test_util.assert_that(output, test_util.equal_to([1.0, 0.0, 3.0]))
       self.assertMetricsEqual(result.metrics(), 'successful-inference', 1)
 
   def test_missing_image_feature(self):
@@ -56,9 +116,7 @@ class GenerateEmbeddingsTest(unittest.TestCase):
       output = input | beam.ParDo(
           inference_beam_lib.GenerateEmbeddingsDoFn('project', 'endpoint'))
       result = p.run()
-      test_util.assert_that(
-          output,
-          test_util.equal_to([]))
+      test_util.assert_that(output, test_util.equal_to([]))
       self.assertMetricsEqual(result.metrics(), 'skipped-inference', 1)
 
   @mock.patch('google.cloud.aiplatform.gapic.PredictionServiceClient')
@@ -72,7 +130,8 @@ class GenerateEmbeddingsTest(unittest.TestCase):
       with test_pipeline.TestPipeline() as p:
         input = p | beam.Create([self._input_example])
         output = input | beam.ParDo(
-            inference_beam_lib.GenerateEmbeddingsDoFn('project', 'endpoint', skip_errors=False))
+            inference_beam_lib.GenerateEmbeddingsDoFn(
+                'project', 'endpoint', skip_errors=False))
         p.run()
 
   @mock.patch('google.cloud.aiplatform.gapic.PredictionServiceClient')
@@ -85,13 +144,72 @@ class GenerateEmbeddingsTest(unittest.TestCase):
     with test_pipeline.TestPipeline() as p:
       input = p | beam.Create([self._input_example])
       output = input | beam.ParDo(
-          inference_beam_lib.GenerateEmbeddingsDoFn('project', 'endpoint', skip_errors=True))
+          inference_beam_lib.GenerateEmbeddingsDoFn(
+              'project', 'endpoint', skip_errors=True))
       result = p.run()
-      test_util.assert_that(
-          output,
-          test_util.equal_to([None]))
+      test_util.assert_that(output, test_util.equal_to([None]))
       self.assertMetricsEqual(result.metrics(), 'failed-inference', 1)
 
 
+class ProcessPredictionTest(InferenceBeamTestCase):
+
+  def setUp(self):
+    self._output_path = tempfile.TemporaryDirectory()
+
+  def tearDown(self):
+    self._output_path.cleanup()
+
+  def test_missing_element(self):
+    with test_pipeline.TestPipeline() as p:
+      input = p | beam.Create([None])
+      output = input | beam.ParDo(inference_beam_lib.ProcessPredictionDoFn())
+      result = p.run()
+      test_util.assert_that(output, test_util.equal_to([]))
+      self.assertMetricsEqual(result.metrics(), 'missing-representation', 1)
+
+  def test_missing_representation(self):
+    input_example = tf.train.Example()
+    with test_pipeline.TestPipeline() as p:
+      input = p | beam.Create([input_example])
+      output = input | beam.ParDo(inference_beam_lib.ProcessPredictionDoFn())
+      result = p.run()
+      test_util.assert_that(output, test_util.equal_to([]))
+      self.assertMetricsEqual(result.metrics(), 'missing-representation', 1)
+
+  def test_no_output_path(self):
+    input_example = tf.train.Example()
+    input_example.features.feature[
+        constants.EMBEDDING_KEY].float_list.value[:] = [1.0, 2.0, 3.0]
+    with test_pipeline.TestPipeline() as p:
+      input = p | beam.Create([input_example])
+      output = input | beam.ParDo(inference_beam_lib.ProcessPredictionDoFn())
+      result = p.run()
+      test_util.assert_that(
+          output,
+          functools.partial(
+              np.testing.assert_array_almost_equal, y=[[1.0, 2.0, 3.0]]))
+
+  def test_output_path(self):
+    input_example = tf.train.Example()
+    input_example.features.feature[
+        constants.IMAGE_ID_KEY].bytes_list.value[:] = [b'image1234.png']
+    input_example.features.feature[
+        constants.EMBEDDING_KEY].float_list.value[:] = [1.0, 2.0, 3.0]
+    with test_pipeline.TestPipeline() as p:
+      input = p | beam.Create([input_example])
+      output = input | beam.ParDo(
+          inference_beam_lib.ProcessPredictionDoFn(self._output_path.name))
+      result = p.run()
+      test_util.assert_that(
+          output,
+          functools.partial(
+              np.testing.assert_array_almost_equal, y=[[1.0, 2.0, 3.0]]))
+      actual = tf.train.Example()
+      filename = os.path.join(self._output_path.name, 'image1234.tfrecord')
+      for example in tf.python_io.tf_record_iterator(filename):
+        actual = tf.train.Example.FromString(example)
+      self.assertEqual(input_example, actual)
+
+
 if __name__ == '__main__':
-    unittest.main()
+  unittest.main()
