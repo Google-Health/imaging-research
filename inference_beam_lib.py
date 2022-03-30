@@ -15,15 +15,20 @@
 # limitations under the License.
 """Collection of Beam DoFns to generate embeddings."""
 import constants
+import example_generator_lib
 
 import base64
 import contextlib
+from enum import Enum
+import io
 from apache_beam.utils import retry
 
 import os
 import six
 import tempfile
 import numpy as np
+from PIL import Image
+import pydicom
 
 import apache_beam as beam
 
@@ -53,6 +58,14 @@ _METRICS_NAMESPACE = 'cxr-embeddings'
 _API_ENDPOINT = 'us-central1-aiplatform.googleapis.com'
 
 
+class InputFileType(Enum):
+  PNG = 'png'
+  DICOM = 'dicom'
+
+  def __str__(self):
+      return self.value
+
+
 def _is_retryable(exc):
   return isinstance(exc, _RETRIABLE_TYPES)
 
@@ -76,8 +89,11 @@ def _open(path, *args, **kwargs):
 @beam.typehints.with_output_types(Optional[tf.train.Example])
 class CreateExampleDoFn(beam.DoFn):
 
-  def __init__(self, output_path: Optional[str] = None):
+  def __init__(self,
+               output_path: Optional[str] = None,
+               input_file_type: InputFileType = InputFileType.PNG):
     self._output_path = output_path
+    self._input_file_type = input_file_type
 
   def process(self, uri: str):
     if self._output_path:
@@ -92,13 +108,17 @@ class CreateExampleDoFn(beam.DoFn):
         beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
                                      'output-file-exists').inc()
         return
-    example = tf.train.Example()
     with _open(uri, 'rb') as f:
+      if self._input_file_type == InputFileType.PNG:
+        img = np.asarray(Image.open(io.BytesIO(f.read())))
+        example = example_generator_lib.png_to_tfexample(img)
+      elif self._input_file_type == InputFileType.DICOM:
+        dicom = pydicom.dcmread(io.BytesIO(f.read()))
+        example = example_generator_lib.dicom_to_tfexample(dicom)
+      else:
+        raise ValueError('Unknown file type.')
       example.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
           six.ensure_binary(uri)
-      ]
-      example.features.feature[constants.IMAGE_KEY].bytes_list.value[:] = [
-          f.read()
       ]
     yield example
 

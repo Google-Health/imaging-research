@@ -18,9 +18,6 @@ GCS_PREFIX = 'gs://'
 # Vertex is only in us-central1 for now.
 LOCATION = 'us-central1'
 
-PNG_SUFFIX = 'png'
-DICOM_SUFFIX = 'dcm'
-
 # tf.Example feature keys.
 IMAGE_KEY = 'image/encoded'
 IMAGE_FORMAT_KEY = 'image/format'

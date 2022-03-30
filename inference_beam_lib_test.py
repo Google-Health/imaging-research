@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import constants
+import example_generator_lib
 import unittest
 from unittest import mock
 
@@ -42,36 +43,29 @@ class CreateExampleTest(InferenceBeamTestCase):
 
   def setUp(self):
     self._output_path = tempfile.TemporaryDirectory()
-    with tempfile.NamedTemporaryFile('wb', delete=False) as f:
-      self._input_file = f.name
-      f.write(b'PNGblahblahblah')
+    self._input_file = './testdata/random.png'
+    self._expected = tf.train.Example()
+    with open('./testdata/expected.png', 'rb') as f:
+      self._expected.features.feature[constants.IMAGE_KEY].bytes_list.value[:] = [f.read()]
+    self._expected.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
+        six.ensure_binary(self._input_file)
+    ]
+    self._expected.features.feature[constants.IMAGE_FORMAT_KEY].bytes_list.value[:] = [
+      b'png'
+    ]
 
   def tearDown(self):
     self._output_path.cleanup()
 
   def test_success(self):
-    expected = tf.train.Example()
-    expected.features.feature[constants.IMAGE_KEY].bytes_list.value[:] = [
-        b'PNGblahblahblah'
-    ]
-    expected.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
-        six.ensure_binary(self._input_file)
-    ]
     with test_pipeline.TestPipeline() as p:
       input = p | beam.Create([self._input_file])
       output = input | beam.ParDo(
           inference_beam_lib.CreateExampleDoFn(self._output_path.name))
       result = p.run()
-      test_util.assert_that(output, test_util.equal_to([expected]))
+      test_util.assert_that(output, test_util.equal_to([self._expected]))
 
   def test_already_existing(self):
-    expected = tf.train.Example()
-    expected.features.feature[constants.IMAGE_KEY].bytes_list.value[:] = [
-        b'PNGblahblahblah'
-    ]
-    expected.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
-        six.ensure_binary(self._input_file)
-    ]
     filebase = inference_beam_lib._image_id_to_filebase(self._input_file)
     with open(
         os.path.join(self._output_path.name, f'{filebase}.tfrecord'), 'w') as f:

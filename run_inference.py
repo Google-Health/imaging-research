@@ -37,6 +37,14 @@ def main(argv=None, save_main_session=True):
       required=True,
       help='Folder or GCS bucket containing input PNG or DICOM files.')
   parser.add_argument(
+      '--input_file_type',
+      dest='input_file_type',
+      required=True,
+      default=inference_beam_lib.InputFileType.PNG,
+      type=inference_beam_lib.InputFileType,
+      choices=list(inference_beam_lib.InputFileType),
+      help=f'The type of input files, either DICOM or PNG.')
+  parser.add_argument(
       '--output_path',
       dest='output_path',
       required=True,
@@ -82,7 +90,8 @@ def main(argv=None, save_main_session=True):
     _ = (
         p | beam.Create(input) | beam.ParDo(
             inference_beam_lib.CreateExampleDoFn(
-                output_path=known_args.output_path))
+                output_path=known_args.output_path,
+                input_file_type=known_args.input_file_type))
         | beam.ParDo(
             inference_beam_lib.GenerateEmbeddingsDoFn(
                 known_args.embeddings_project, known_args.endpoint_id))
