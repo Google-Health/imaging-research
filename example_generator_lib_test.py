@@ -16,6 +16,7 @@
 """Tests for example_generator_lib."""
 import example_generator_lib
 
+import numpy as np
 import pydicom
 import unittest
 
@@ -31,7 +32,7 @@ class ExampleGeneratorLibTest(unittest.TestCase):
     test_example = example_generator_lib.dicom_to_tfexample(dicom)
     f_dict = test_example.features.feature
     self.assertEqual(f_dict['image/format'].bytes_list.value[:], [b'png'])
-    self.assertEqual(len(f_dict['image/encoded'].bytes_list.value[0]), 32737)
+    self.assertEqual(len(f_dict['image/encoded'].bytes_list.value[0]), 23287)
 
 
 if __name__ == '__main__':

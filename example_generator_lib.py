@@ -142,7 +142,9 @@ def _apply_pydicom_prep(ds: pydicom.Dataset) -> np.ndarray:
   if ds.PhotometricInterpretation == 'MONOCHROME1':
     pixel_array = np.max(pixel_array) - pixel_array
   pixel_array = _shift_to_unsigned(pixel_array)
-  pixel_array = _rescale_dynamic_range(pixel_array)
+  # Don't rescale dynamic range for 8-bit images like CXR14.
+  if pixel_array.dtype != np.uint8:
+    pixel_array = _rescale_dynamic_range(pixel_array)
   return pixel_array
 
 
@@ -168,8 +170,10 @@ def png_to_tfexample(image_array: np.ndarray) -> tf.train.Example:
     example: A tf.example for inference.
   """
   pixel_array = _shift_to_unsigned(image_array)
-  pixel_array = _rescale_dynamic_range(pixel_array)
-  png_bytes = _encode_png(pixel_array.astype(np.uint16))
+  # Don't rescale dynamic range for 8-bit images like CXR14.
+  if pixel_array.dtype != np.uint8:
+    pixel_array = _rescale_dynamic_range(pixel_array)
+  png_bytes = _encode_png(pixel_array)
   example = tf.train.Example()
   features = example.features.feature
   _assign_bytes_feature(features[constants.IMAGE_KEY], png_bytes)
@@ -190,7 +194,7 @@ def dicom_to_tfexample(single_dicom: pydicom.Dataset) -> tf.train.Example:
     example: A tf.example for inference.
   """
   image_array = _apply_pydicom_prep(single_dicom)
-  png_bytes = _encode_png(image_array.astype(np.uint16))
+  png_bytes = _encode_png(image_array)
   example = tf.train.Example()
   features = example.features.feature
   _assign_bytes_feature(features[constants.IMAGE_KEY], png_bytes)
