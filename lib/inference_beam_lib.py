@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Collection of Beam DoFns to generate embeddings."""
-import constants
-import example_generator_lib
+from lib import constants
+from lib import example_generator_lib
 
 import base64
 import contextlib
@@ -110,7 +110,7 @@ class CreateExampleDoFn(beam.DoFn):
         return
     with _open(uri, 'rb') as f:
       if self._input_file_type == InputFileType.PNG:
-        img = np.asarray(Image.open(io.BytesIO(f.read())))
+        img = np.asarray(Image.open(io.BytesIO(f.read())).convert('L'))
         example = example_generator_lib.png_to_tfexample(img)
       elif self._input_file_type == InputFileType.DICOM:
         dicom = pydicom.dcmread(io.BytesIO(f.read()))

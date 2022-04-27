@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Beam pipeline to generate embeddings from a list of PNG or DICOM files."""
-import constants
-import inference_beam_lib
+from lib import constants
+from lib import inference_beam_lib
 
 import argparse
 import glob
@@ -25,7 +25,7 @@ import os
 import apache_beam as beam
 from apache_beam.options import pipeline_options
 
-_REQUIREMENTS_FILE = 'requirements.txt'
+_REQUIREMENTS_FILE = 'requirements-inference.txt'
 _SETUP_FILE = './setup.py'
 
 

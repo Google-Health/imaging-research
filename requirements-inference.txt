@@ -1,0 +1,6 @@
+google-api-python-client==1.12.8
+google-apitools==0.5.31
+google-cloud-aiplatform==0.7.1
+google-cloud-storage==1.42.3
+pypng==0.0.20
+pydicom==2.3.0

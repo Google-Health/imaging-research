@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Library functions for training small networks on CXR embeddings."""
-import constants
+from lib import constants
 
 import functools
 import glob
