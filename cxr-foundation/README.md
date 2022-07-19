@@ -11,60 +11,44 @@
     1. Convert DICOM images into PNGs suitable for calling CXR Foundation
     2. Call the API to generate embeddings from the PNG
     3. Train a model given a set of embeddings and corresponding ground truth
-4. Install the gcloud CLI and login
-    4. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install)
-    5. Open a command line and run 
+4. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and login
 
-        ```
-        gcloud auth application-default login
-        ```
+	  1. Open a command line and login. This will automatically accept the [Google Cloud Platform TOS](https://cloud.google.com/terms).
 
-        This will automatically accept the [Google Cloud Platform TOS](https://cloud.google.com/terms)
-
+			gcloud auth application-default login
 5. Clone the Repository into a local directory
-    6. `git clone https://github.com/Google-Health/imaging-research`
 
-        ```
-        cd imaging-research/cxr-foundation
-        ```
+		git clone https://github.com/Google-Health/imaging-research
+		cd imaging-research/cxr-foundation
 
 
 6. Install the CXR Foundation libraries in a virtual environment
-
-        ```
+       
         python -m venv env
         source env/bin/activate
         pip install -r requirements.txt
         pip install .
-        ```
-
 
 7. Run the CXR Foundation code in your local/cloud environment and start training
     7. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory
     8. Generate and export embeddings, for example:
 
-        ```
-        python -m run_inference --input_path "gs://your/cloud/bucket/inputs/" --output_path "gs://your/cloud/bucket/outputs/" --embeddings_project gh-rad-validation-cxrembd-deid --endpoint_id 6695981832690728960 --limit 5 --input_file_type='dicom'
-        ```
+			python -m run_inference --input_path "gs://your/cloud/bucket/inputs/" --output_path "gs://your/cloud/bucket/outputs/" --embeddings_project gh-rad-validation-cxrembd-deid --endpoint_id 6695981832690728960 --limit 5 --input_file_type='dicom'
 
 
     9. Train on the embeddings, for example (see source code for details on CSV format and args):
 
-        ```
-        python -m train --train_split_name train --tune_split_name tune --labels_csv labels.csv --head_name EFFUSION --data_dir ~/your/local/dir/ --num_epochs 30
-        ```
-
+			python -m train --train_split_name train --tune_split_name tune --labels_csv labels.csv --head_name EFFUSION --data_dir ~/your/local/dir/ --num_epochs 30
 
 8. Have questions? Email [cxr-foundation@google.com](mailto:cxr-foundation@google.com).
 
 **Notes**: 
 
-
 *   Google does not keep a copy of any images sent.
 *   Google monitors daily query volume and aggregates on a per-user and per-organization basis. Access can be revoked if a user or organization exceeds a reasonable query volume.
 *   If you consented to follow-up, Google may reach out for feedback.
 *   Please use the following reference for any published work:
-    *   Sellergren[ A, Chen C, et al. ](http://paperpile.com/b/WCNUiH/NSej)Simplified Transfer Learning for Chest Radiography Models Using Less Data[. Radiology. 2022.](http://paperpile.com/b/WCNUiH/NSej)
+    *   Sellergren A, Chen C, et al. Simplified Transfer Learning for Chest Radiography Models Using Less Data. Radiology. 2022.
 
 
 # Model Card for CXR Foundation
@@ -76,15 +60,13 @@
 ### Overview
 
 
-    This model generates embeddings for chest x-rays (CXRs). Embeddings are n-dimensional vectors of floating points representing a projection of the original image into a compressed feature space capable of describing potential abnormalities that exist in the image. These embeddings are to be used by “downstream models” for final tasks such as detecting a particular abnormality in a CXR. The model uses the EfficientNet-L2 architecture (https://arxiv.org/pdf/1911.04252v4.pdf). It was trained on 821,544 CXRs from India and the US using abnormal vs. normal labels, i.e. the image contained any kind of abnormality, and the Supervised Contrastive loss (https://arxiv.org/abs/2004.11362v1). The abnormal vs. normal labels were obtained from more granular labels (e.g. pneumothorax, fracture) as well as regular expressions on radiology reports (https://pubmed.ncbi.nlm.nih.gov/34471144/).
+This model generates embeddings for chest x-rays (CXRs). Embeddings are n-dimensional vectors of floating points representing a projection of the original image into a compressed feature space capable of describing potential abnormalities that exist in the image. These embeddings are to be used by “downstream models” for final tasks such as detecting a particular abnormality in a CXR. The model uses the EfficientNet-L2 architecture (https://arxiv.org/pdf/1911.04252v4.pdf). It was trained on 821,544 CXRs from India and the US using abnormal vs. normal labels, i.e. the image contained any kind of abnormality, and the Supervised Contrastive loss (https://arxiv.org/abs/2004.11362v1). The abnormal vs. normal labels were obtained from more granular labels (e.g. pneumothorax, fracture) as well as regular expressions on radiology reports (https://pubmed.ncbi.nlm.nih.gov/34471144/).
 
 
 ### Version
 
 
     name: v1.0
-
-
     date: 2022-07-19
 
 
