@@ -52,7 +52,6 @@ def main(argv=None, save_main_session=True):
   parser.add_argument(
       '--limit',
       dest='limit',
-      default=100,
       type=int,
       help='Only process this many input files.')
   parser.add_argument(
@@ -60,11 +59,13 @@ def main(argv=None, save_main_session=True):
       dest='endpoint_id',
       required=True,
       type=int,
+      default=6695981832690728960,
       help='Numerical ID for embeddings API.')
   parser.add_argument(
       '--embeddings_project',
       dest='embeddings_project',
       required=True,
+      default='gh-rad-validation-cxrembd-deid',
       help='GCP project ID that hosts embeddings API.')
   known_args, pipeline_args = parser.parse_known_args(argv)
   options = pipeline_options.PipelineOptions(pipeline_args)
