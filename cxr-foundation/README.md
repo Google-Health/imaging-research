@@ -30,13 +30,12 @@
         pip install .
 
 7. Run the CXR Foundation code in your local/cloud environment and start training
-    7. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory
-    8. Generate and export embeddings, for example:
+    1. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory
+    2. Generate and export embeddings, for example:
 
 			python -m run_inference --input_path "gs://your/cloud/bucket/inputs/" --output_path "gs://your/cloud/bucket/outputs/" --embeddings_project gh-rad-validation-cxrembd-deid --endpoint_id 6695981832690728960 --limit 5 --input_file_type='dicom'
 
-
-    9. Train on the embeddings, for example (see source code for details on CSV format and args):
+    3. Train on the embeddings, for example (see source code for details on CSV format and args):
 
 			python -m train --train_split_name train --tune_split_name tune --labels_csv labels.csv --head_name EFFUSION --data_dir ~/your/local/dir/ --num_epochs 30
 
