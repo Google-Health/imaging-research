@@ -1,8 +1,8 @@
-# CXR Foundation API
+<img src="logo.png" alt="CXR Foundation" width="500"/>
 
-**Purpose**: This document describes how to access the chest x-ray embeddings introduced in our _Radiology_ paper, [Simplified Transfer Learning for Chest Radiography Models Using Less Data](https://doi.org/10.1148/radiol.212482).
+**CXR Foundation** is a tool to generate custom embeddings from chest x-ray (CXR) images. These embeddings can be used to develop custom machine learning models for CXR with less data and compute. You can read more about the research behind CXR Foundation in our recent publication: [Simplified Transfer Learning for Chest Radiography Models Using Less Data](https://doi.org/10.1148/radiol.212482).
 
-**Steps for Using CXR Foundation**
+##How to use CXR Foundation
 
 
 1. Fill out the [API access form](https://forms.gle/SJBSawfDw19JZRA59). Your provided Gmail account will be used for access once approved for non-clinical use.
