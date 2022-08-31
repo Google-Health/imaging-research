@@ -1,4 +1,4 @@
-<img src="logo.png" alt="CXR Foundation" width="500"/>
+<img src="logo.png" alt="CXR Foundation" width="100%"/>
 
 **CXR Foundation** is a tool to generate custom embeddings from chest x-ray (CXR) images. These embeddings can be used to develop custom machine learning models for CXR with less data and compute. You can read more about the research behind CXR Foundation in our recent publication: [Simplified Transfer Learning for Chest Radiography Models Using Less Data](https://doi.org/10.1148/radiol.212482).
 
