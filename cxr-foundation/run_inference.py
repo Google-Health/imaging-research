@@ -57,14 +57,12 @@ def main(argv=None, save_main_session=True):
   parser.add_argument(
       '--endpoint_id',
       dest='endpoint_id',
-      required=True,
       type=int,
       default=6695981832690728960,
       help='Numerical ID for embeddings API.')
   parser.add_argument(
       '--embeddings_project',
       dest='embeddings_project',
-      required=True,
       default='gh-rad-validation-cxrembd-deid',
       help='GCP project ID that hosts embeddings API.')
   known_args, pipeline_args = parser.parse_known_args(argv)
@@ -72,11 +70,17 @@ def main(argv=None, save_main_session=True):
 
   if known_args.input_path.startswith(constants.GCS_PREFIX):
     input = list(beam.io.gcp.gcsio.GcsIO().list_prefix(known_args.input_path))
+  elif '*' in known_args.input_path:
+    input = glob.glob(known_args.input_path)
   else:
     input = [
         os.path.join(known_args.input_path, f)
         for f in os.listdir(known_args.input_path)
     ]
+
+  if (not known_args.output_path.startswith(constants.GCS_PREFIX) and
+      not os.path.exists(known_args.output_path)):
+    os.mkdir(known_args.output_path)
 
   if known_args.limit > 0:
     input = input[:known_args.limit]
