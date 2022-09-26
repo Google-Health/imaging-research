@@ -65,6 +65,11 @@ def main(argv=None, save_main_session=True):
       dest='embeddings_project',
       default='gh-rad-validation-cxrembd-deid',
       help='GCP project ID that hosts embeddings API.')
+  parser.add_argument(
+      '--skip_errors',
+      dest='skip_errors',
+      default=False,
+      help='Whether to suppress exceptions thrown by GenerateEmbeddingsDoFn.')
   known_args, pipeline_args = parser.parse_known_args(argv)
   options = pipeline_options.PipelineOptions(pipeline_args)
 
@@ -99,7 +104,8 @@ def main(argv=None, save_main_session=True):
                 input_file_type=known_args.input_file_type))
         | beam.ParDo(
             inference_beam_lib.GenerateEmbeddingsDoFn(
-                known_args.embeddings_project, known_args.endpoint_id))
+                known_args.embeddings_project, known_args.endpoint_id,
+                skip_errors=known_args.skip_errors))
         | beam.ParDo(
             inference_beam_lib.ProcessPredictionDoFn(
                 output_path=known_args.output_path))
