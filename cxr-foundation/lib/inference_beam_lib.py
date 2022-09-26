@@ -148,7 +148,7 @@ class GenerateEmbeddingsDoFn(beam.DoFn):
     retry_policy = Retry(predicate=_is_retryable)
     try:
       response = api_client.predict(
-          endpoint=endpoint, instances=instances, retry=retry_policy)
+          endpoint=endpoint, instances=instances, retry=retry_policy, timeout=300)
       beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
                                    'successful-inference').inc()
     except Exception as e:
