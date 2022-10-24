@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Beam pipeline to generate embeddings from a list of PNG or DICOM files."""
-from lib import constants
-from lib import inference_beam_lib
+from cxr_foundation import constants
+from cxr_foundation import inference_beam_lib
 
 import argparse
 import glob

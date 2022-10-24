@@ -36,7 +36,7 @@ Example command:
  --labels_csv labels.csv --head_name AIRSPACE_OPACITY \
  --data_dir ./data/ --num_epochs 30`
 """
-from lib import train_lib
+from cxr_foundation import train_lib
 
 import glob
 import os
