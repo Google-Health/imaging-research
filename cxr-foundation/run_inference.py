@@ -92,9 +92,9 @@ def main(argv=None, save_main_session=True):
 
   options.view_as(
       pipeline_options.SetupOptions).save_main_session = save_main_session
-  options.view_as(
-      pipeline_options.SetupOptions).requirements_file = _REQUIREMENTS_FILE
-  options.view_as(pipeline_options.SetupOptions).setup_file = _SETUP_FILE
+  # options.view_as(
+  #     pipeline_options.SetupOptions).requirements_file = _REQUIREMENTS_FILE
+  # options.view_as(pipeline_options.SetupOptions).setup_file = _SETUP_FILE
 
   with beam.Pipeline(options=options) as p:
     _ = (

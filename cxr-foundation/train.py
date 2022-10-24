@@ -74,7 +74,7 @@ def main(argv):
   training_df = df[df['split'] == FLAGS.train_split_name]
   training_labels = dict(
       zip(training_df['image_id'], training_df[FLAGS.head_name].astype(int)))
-  filenames = glob.glob(os.path.join(FLAGS.data_dir, '*'))
+  filenames = glob.glob(os.path.join(FLAGS.data_dir, '*.tfrecord'))
   training_data = train_lib.get_dataset(filenames, labels=training_labels)
   tune_data = None
   if FLAGS.tune_split_name:
@@ -88,6 +88,8 @@ def main(argv):
           tf.data.AUTOTUNE).cache(),
       validation_data=tune_data,
       epochs=FLAGS.num_epochs)
+  model.save(
+      os.path.join(FLAGS.data_dir, 'model'), include_optimizer=False)
 
 
 if __name__ == '__main__':
