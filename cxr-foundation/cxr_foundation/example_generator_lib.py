@@ -15,7 +15,7 @@
 # limitations under the License.
 """Methods to create tf.examples for model inference via pydicom."""
 
-from lib import constants
+from cxr_foundation import constants
 
 import io
 from typing import Iterable, Union

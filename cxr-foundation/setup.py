@@ -17,7 +17,7 @@ import setuptools
 
 setuptools.setup(
   name='cxr-foundation',
-  version='0.0.7',
+  version='0.0.9',
   description='CXR Foundation: chest x-ray embeddings generation.',
   install_requires=[
     'google-api-python-client',

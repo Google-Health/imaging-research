@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Collection of Beam DoFns to generate embeddings."""
-from lib import constants
-from lib import example_generator_lib
+from cxr_foundation import constants
+from cxr_foundation import example_generator_lib
 
 import base64
 import contextlib
