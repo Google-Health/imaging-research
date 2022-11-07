@@ -138,7 +138,13 @@ def _apply_pydicom_prep(ds: pydicom.Dataset) -> np.ndarray:
   arr = ds.pixel_array
   pixel_array = apply_modality_lut(arr, ds)
   if _WINDOWWIDTH in ds and _WINDOWCENTER in ds:
-    pixel_array = window_u16(pixel_array, ds.WindowCenter, ds.WindowWidth)
+    window_center = ds.WindowCenter
+    window_width = ds.WindowWidth
+    if isinstance(ds.WindowCenter, pydicom.multival.MultiValue):
+      window_center = int(ds.WindowCenter[0])
+    if isinstance(ds.WindowWidth, pydicom.multival.MultiValue):
+      window_width = int(ds.WindowWidth[0])
+    pixel_array = window_u16(pixel_array, window_center, window_width)
   if ds.PhotometricInterpretation == 'MONOCHROME1':
     pixel_array = np.max(pixel_array) - pixel_array
   pixel_array = _shift_to_unsigned(pixel_array)

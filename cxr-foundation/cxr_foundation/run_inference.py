@@ -25,9 +25,6 @@ import os
 import apache_beam as beam
 from apache_beam.options import pipeline_options
 
-_REQUIREMENTS_FILE = 'requirements-inference.txt'
-_SETUP_FILE = './setup.py'
-
 
 def main(argv=None, save_main_session=True):
   parser = argparse.ArgumentParser()
@@ -92,16 +89,14 @@ def main(argv=None, save_main_session=True):
 
   options.view_as(
       pipeline_options.SetupOptions).save_main_session = save_main_session
-  # options.view_as(
-  #     pipeline_options.SetupOptions).requirements_file = _REQUIREMENTS_FILE
-  # options.view_as(pipeline_options.SetupOptions).setup_file = _SETUP_FILE
 
   with beam.Pipeline(options=options) as p:
     _ = (
         p | beam.Create(input) | beam.ParDo(
             inference_beam_lib.CreateExampleDoFn(
                 output_path=known_args.output_path,
-                input_file_type=known_args.input_file_type))
+                input_file_type=known_args.input_file_type,
+                skip_errors=known_args.skip_errors))
         | beam.ParDo(
             inference_beam_lib.GenerateEmbeddingsDoFn(
                 known_args.embeddings_project, known_args.endpoint_id,

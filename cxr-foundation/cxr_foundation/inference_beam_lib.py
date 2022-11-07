@@ -56,6 +56,8 @@ _RETRIABLE_TYPES = (
 
 _METRICS_NAMESPACE = 'cxr-embeddings'
 _API_ENDPOINT = 'us-central1-aiplatform.googleapis.com'
+_VIEW_POSITION = 'ViewPosition'
+_FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
 
 class InputFileType(Enum):
@@ -91,9 +93,11 @@ class CreateExampleDoFn(beam.DoFn):
 
   def __init__(self,
                output_path: Optional[str] = None,
-               input_file_type: InputFileType = InputFileType.PNG):
+               input_file_type: InputFileType = InputFileType.PNG,
+               skip_errors: bool = False):
     self._output_path = output_path
     self._input_file_type = input_file_type
+    self._skip_errors = skip_errors
 
   def process(self, uri: str):
     if self._output_path:
@@ -108,19 +112,27 @@ class CreateExampleDoFn(beam.DoFn):
         beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
                                      'output-file-exists').inc()
         return
-    with _open(uri, 'rb') as f:
-      if self._input_file_type == InputFileType.PNG:
-        img = np.asarray(Image.open(io.BytesIO(f.read())).convert('L'))
-        example = example_generator_lib.png_to_tfexample(img)
-      elif self._input_file_type == InputFileType.DICOM:
-        dicom = pydicom.dcmread(io.BytesIO(f.read()))
-        example = example_generator_lib.dicom_to_tfexample(dicom)
-      else:
-        raise ValueError('Unknown file type.')
-      example.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
-          six.ensure_binary(uri)
-      ]
-    yield example
+    try:
+      with _open(uri, 'rb') as f:
+        if self._input_file_type == InputFileType.PNG:
+          img = np.asarray(Image.open(io.BytesIO(f.read())).convert('L'))
+          example = example_generator_lib.png_to_tfexample(img)
+        elif self._input_file_type == InputFileType.DICOM:
+          dicom = pydicom.dcmread(io.BytesIO(f.read()))
+          if _VIEW_POSITION in dicom and dicom.ViewPosition not in _FRONTAL_VIEW_POSITIONS:
+            beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'non-frontal-cxr').inc()
+            return
+          example = example_generator_lib.dicom_to_tfexample(dicom)
+        else:
+          raise ValueError('Unknown file type.')
+        example.features.feature[constants.IMAGE_ID_KEY].bytes_list.value[:] = [
+            six.ensure_binary(uri)
+        ]
+      yield example
+    except Exception as e:
+      beam.metrics.Metrics.counter(_METRICS_NAMESPACE, 'failed-example-creation').inc()
+      if not self._skip_errors:
+        raise e
 
 
 @beam.typehints.with_input_types(Optional[tf.train.Example])
@@ -148,7 +160,7 @@ class GenerateEmbeddingsDoFn(beam.DoFn):
     retry_policy = Retry(predicate=_is_retryable)
     try:
       response = api_client.predict(
-          endpoint=endpoint, instances=instances, retry=retry_policy, timeout=300)
+          endpoint=endpoint, instances=instances, retry=retry_policy, timeout=60)
       beam.metrics.Metrics.counter(_METRICS_NAMESPACE,
                                    'successful-inference').inc()
     except Exception as e:
