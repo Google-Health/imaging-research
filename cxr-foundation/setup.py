@@ -17,7 +17,7 @@ import setuptools
 
 setuptools.setup(
   name='cxr-foundation',
-  version='0.0.11',
+  version='0.0.12',
   description='CXR Foundation: chest x-ray embeddings generation.',
   install_requires=[
     'google-api-python-client',
@@ -32,6 +32,7 @@ setuptools.setup(
     'pydicom',
     'tf-models-official >= 2.10.0',
     'protobuf',
-    'typing-extensions'
+    'typing-extensions',
+    'shapely < 2.0.0'
   ],
   packages=setuptools.find_packages())
