@@ -31,7 +31,7 @@ setuptools.setup(
     'pypng',
     'pydicom',
     'tf-models-official >= 2.10.0',
-    'protobuf <= 3.20',
+    'protobuf < 3.20',
     'typing-extensions',
     'shapely < 2.0.0'
   ],
