@@ -17,7 +17,6 @@
 from cxr_foundation import constants
 
 import functools
-import glob
 
 import tensorflow.compat.v2 as tf
 import tensorflow_models as tfm
@@ -110,12 +109,11 @@ def get_dataset(
     weight = 1.0
     if weights:
       weight = weights.lookup(image_id)
+
     return features, label, weight, image_id
 
-  # Look up labels and weights.
   dataset = dataset.map(_lookup_label).map(_lookup_weight)
 
-  # Remove the IDs and filter out zero weights and negative labels.
   return dataset.map(lambda features, label, weight, image_id:
                      (features, label, weight)).filter(
                          filter_negative_labels).filter(filter_zero_weights)
@@ -131,7 +129,11 @@ def create_model(heads,
                  hidden_layer_sizes=[512, 256],
                  weight_decay=0.0,
                  seed=None):
-  """Creates linear probe or multilayer perceptron using LARS + cosine decay."""
+  """
+  Creates linear probe or multilayer perceptron using LARS + cosine decay.
+
+
+  """
   inputs = tf.keras.Input(shape=(embeddings_size,))
   hidden = inputs
   # If no hidden_layer_sizes are provided, model will be a linear probe.
@@ -150,11 +152,13 @@ def create_model(heads,
       activation='sigmoid',
       kernel_initializer=tf.keras.initializers.HeUniform(seed=seed))(
           hidden)
+
   outputs = {}
   for i, head in enumerate(heads):
     outputs[head] = tf.keras.layers.Lambda(
         lambda x: x[..., i:i + 1], name=head.lower())(
             output)
+
   model = tf.keras.Model(inputs, outputs)
   learning_rate_fn = tf.keras.experimental.CosineDecay(
       tf.cast(learning_rate, tf.float32),
