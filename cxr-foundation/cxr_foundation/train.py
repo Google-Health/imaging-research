@@ -46,8 +46,7 @@ flags.DEFINE_string(
     '',
     (
         'The absolute or relative path containing the training embeddings .tfrecord files.'
-    ),
-    required=True
+    )
 )
 
 flags.DEFINE_string('labels_csv', '', 'CSV file containing splits and labels', required=True)
@@ -57,23 +56,22 @@ flags.DEFINE_string(
     None,
     (
         'The name of the head/column to train on, from `labels_csv`.'
-    ),
-    required=True
+    )
 )
 
 flags.DEFINE_string(
     'train_label',
     '',
-    'The value of the "split" column of `labels_csv` that indicates a training sample.', required=True,
+    'The value of the "split" column of `labels_csv` that indicates a training sample.'
 )
 
 flags.DEFINE_string(
     'validate_label',
     '',
-    'The value of the "split" column of `labels_csv` that indicates a validation sample.', required=True
+    'The value of the "split" column of `labels_csv` that indicates a validation sample.'
 )
 
-flags.DEFINE_integer('save_model_name', '', 'The absolute or relative file name to save the model to.', required=True)
+flags.DEFINE_string('save_model_name', '', 'The absolute or relative file name to save the model to.')
 
 flags.DEFINE_integer('batch_size', 512, 'The batch size for model training.')
 flags.DEFINE_integer('num_epochs', 300, 'The number of epochs to train.')
@@ -81,7 +79,7 @@ flags.DEFINE_integer('num_epochs', 300, 'The number of epochs to train.')
 FLAGS = flags.FLAGS
 
 
-def _main():
+def _main(_):
   """
   Simple command line wrapper to call train_model
   """
