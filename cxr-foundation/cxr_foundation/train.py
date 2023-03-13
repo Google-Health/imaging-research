@@ -49,7 +49,7 @@ flags.DEFINE_string(
     )
 )
 
-flags.DEFINE_string('labels_csv', '', 'CSV file containing splits and labels', required=True)
+flags.DEFINE_string('labels_csv', '', 'CSV file containing splits and labels')
 
 flags.DEFINE_string(
     'head_name',
