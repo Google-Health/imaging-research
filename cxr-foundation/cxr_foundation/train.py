@@ -77,6 +77,9 @@ flags.DEFINE_integer('batch_size', 512, 'The batch size for model training.')
 flags.DEFINE_integer('num_epochs', 300, 'The number of epochs to train.')
 
 flags.DEFINE_string('best_metrics', 'val_auc', 'The metrics used for saving the best model ckpt.')
+flags.DEFINE_string('best_metrics_mode', 'max',
+                    'The decision to overwrite the current save file is made based on either the '
+                    'maximization or the minimization of the monitored quantity.')
 
 FLAGS = flags.FLAGS
 
@@ -166,7 +169,7 @@ def train_model(
       filepath=save_model_name,
       save_weights_only=True,
       monitor=FLAGS.best_metrics,
-      mode='auto',
+      mode=FLAGS.best_metrics_mode,
       save_best_only=True,
       verbose=1)
 
