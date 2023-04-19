@@ -170,6 +170,10 @@ def create_model(heads,
       loss=dict([(head, 'binary_crossentropy') for head in heads]),
       loss_weights=loss_weights or dict([(head, 1.) for head in heads]),
       weighted_metrics=[
+        tf.keras.metrics.FalsePositives(),
+        tf.keras.metrics.FalseNegatives(),
+        tf.keras.metrics.TruePositives(),
+        tf.keras.metrics.TrueNegatives(),
         tf.keras.metrics.AUC(),
         tf.keras.metrics.AUC(curve='PR', name='auc_pr')])
   return model
