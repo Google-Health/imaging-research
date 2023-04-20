@@ -182,7 +182,7 @@ def train_model(
       epochs=num_epochs,
       callbacks=[model_checkpoint_callback],
   )
-  model.load_model(save_model_name)
+  model.load_weights(save_model_name)
   return model
 
 
