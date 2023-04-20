@@ -104,6 +104,7 @@ def _main(_):
       num_epochs=FLAGS.num_epochs,
       save_model_name=FLAGS.save_model_name)
 
+  model.save(FLAGS.save_model_name, include_optimizer=False)
   print(f"Saved trained model to file: {FLAGS.save_model_name}")
   
   return
@@ -167,7 +168,7 @@ def train_model(
 
   model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=save_model_name,
-      save_weights_only=False,
+      save_weights_only=True,
       monitor=FLAGS.best_metrics,
       mode=FLAGS.best_metrics_mode,
       save_best_only=True,
@@ -181,7 +182,7 @@ def train_model(
       epochs=num_epochs,
       callbacks=[model_checkpoint_callback],
   )
-  model = tf.keras.models.load_model(save_model_name)
+  model.load_model(save_model_name)
   return model
 
 
