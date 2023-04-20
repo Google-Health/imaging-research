@@ -167,7 +167,7 @@ def train_model(
 
   model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=save_model_name,
-      save_weights_only=True,
+      save_weights_only=False,
       monitor=FLAGS.best_metrics,
       mode=FLAGS.best_metrics_mode,
       save_best_only=True,
@@ -181,7 +181,7 @@ def train_model(
       epochs=num_epochs,
       callbacks=[model_checkpoint_callback],
   )
-
+  model.load_weights(save_model_name)
   return model
 
 
