@@ -76,6 +76,11 @@ flags.DEFINE_string('save_model_name', '', 'The absolute or relative file name t
 flags.DEFINE_integer('batch_size', 512, 'The batch size for model training.')
 flags.DEFINE_integer('num_epochs', 300, 'The number of epochs to train.')
 
+flags.DEFINE_string('best_metrics', 'val_auc', 'The metrics used for saving the best model ckpt.')
+flags.DEFINE_string('best_metrics_mode', 'max',
+                    'The decision to overwrite the current save file is made based on either the '
+                    'maximization or the minimization of the monitored quantity.')
+
 FLAGS = flags.FLAGS
 
 
@@ -96,7 +101,8 @@ def _main(_):
       train_label=FLAGS.train_label,
       validate_label=FLAGS.validate_label,
       batch_size=FLAGS.batch_size,
-      num_epochs=FLAGS.num_epochs)
+      num_epochs=FLAGS.num_epochs,
+      save_model_name=FLAGS.save_model_name)
 
   model.save(FLAGS.save_model_name, include_optimizer=False)
   print(f"Saved trained model to file: {FLAGS.save_model_name}")
@@ -113,6 +119,7 @@ def train_model(
     model: tf.keras.Model = None,
     batch_size: int = 512,
     num_epochs: int = 300,
+    save_model_name: str = None,
 ) -> tf.keras.Model:
   """Train a classification model from a set of .tfrecord image embeddings and their labels.
 
@@ -125,6 +132,7 @@ def train_model(
     model: The model to train. Defaults to the model from `train_lib.create_model` if none is specified. 
     batch_size: Batch size for training.
     num_epochs: Number of epochs to train.
+    save_model_name: Name for the model to save.
 
   The `df_labels` DataFrame must contain the follow columns with the specified headings:
   - "{head_name}" (equal to the `head_name` param): The label/outcome to train on.
@@ -158,14 +166,23 @@ def train_model(
         train_lib.get_dataset(file_names, labels=validate_labels).batch(1).cache()
     )
 
+  model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+      filepath=save_model_name,
+      save_weights_only=True,
+      monitor=FLAGS.best_metrics,
+      mode=FLAGS.best_metrics_mode,
+      save_best_only=True,
+      verbose=1)
+
   # Get default model if none was specified
   model = model or train_lib.create_model([head_name])
   model.fit(
       x=training_data.batch(batch_size).prefetch(tf.data.AUTOTUNE).cache(),
       validation_data=validation_data,
       epochs=num_epochs,
+      callbacks=[model_checkpoint_callback],
   )
-
+  model.load_weights(save_model_name)
   return model
 
 
