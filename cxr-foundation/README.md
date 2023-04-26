@@ -47,7 +47,7 @@
 *   Google monitors daily query volume and aggregates on a per-user and per-organization basis. Access can be revoked if a user or organization exceeds a reasonable query volume.
 *   If you consented to follow-up, Google may reach out for feedback.
 *   Please use the following reference for any published work:
-    *   Sellergren A, Chen C, et al. Simplified Transfer Learning for Chest Radiography Models Using Less Data. Radiology. 2022.
+    *   Sellergren AB, Chen C, Nabulsi Z, Li Y, Maschinot A, Sarna A, Huang J, Lau C, Kalidindi SR, Etemadi M, Garcia-Vicente F, Melnick D, Liu Y, Eswaran K, Tse D, Beladia N, Krishnan D, Shetty S. Simplified Transfer Learning for Chest Radiography Models Using Less Data. Radiology. 2022 Nov;305(2):454-465. doi: 10.1148/radiol.212482. Epub 2022 Jul 19. PMID: 35852426.
 
 
 ## Contributing

@@ -112,7 +112,7 @@ def _shift_to_unsigned(image: np.ndarray) -> np.ndarray:
   elif image.dtype == np.int8:
     image = image.astype(np.int16)
     return (image - np.min(image)).astype(np.uint8)
-  elif image.dtype == np.float:
+  elif image.dtype in (np.float32, np.float64):
     uint16_max = np.iinfo(np.uint16).max
     image = image - np.min(image)
     if np.max(image) > uint16_max:
