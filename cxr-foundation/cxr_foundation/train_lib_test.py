@@ -13,15 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import train_lib
-
+import glob
+from typing import Any, List, Tuple
 import unittest
 
-import glob
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 
-from typing import Any, List, Tuple
+from embeddings_data import get_dataset
 
 
 def _flatten(dataset: List[Tuple[tf.Tensor]]) -> List[Any]:
@@ -37,15 +36,15 @@ def _flatten(dataset: List[Tuple[tf.Tensor]]) -> List[Any]:
   return flattened
 
 
-class TrainLibTestCase(unittest.TestCase):
+class EmbeddingsDataTestCase(unittest.TestCase):
 
   def test_empty_labels_fails(self):
     with self.assertRaises(AssertionError):
-      train_lib.get_dataset(sorted(glob.glob('./testdata/*.tfrecord')), {})
+      get_dataset(sorted(glob.glob('./testdata/*.tfrecord')), {})
 
   def test_get_dataset_single_label(self):
     dataset = _flatten(
-        train_lib.get_dataset(
+        get_dataset(
             sorted(glob.glob('./testdata/*.tfrecord')),
             {'gs://superrad/inputs/cxr14/00000001_000.png': 1},
             embeddings_size=5))
@@ -60,7 +59,7 @@ class TrainLibTestCase(unittest.TestCase):
 
   def test_get_dataset_weights(self):
     dataset = _flatten(
-        train_lib.get_dataset(
+        get_dataset(
             sorted(glob.glob('./testdata/*.tfrecord')),
             {'gs://superrad/inputs/cxr14/00000001_000.png': 1},
             embeddings_size=5,

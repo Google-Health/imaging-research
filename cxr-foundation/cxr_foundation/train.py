@@ -39,7 +39,8 @@ from absl import flags
 import pandas as pd
 import tensorflow as tf
 
-from cxr_foundation import train_lib
+from cxr_foundation.embeddings_data import get_dataset
+from cxr_foundation.models import create_model
 
 flags.DEFINE_string(
     'data_dir',
@@ -89,7 +90,7 @@ def _main(_):
   Simple command line wrapper to call train_model
   """
   file_names = glob.glob(os.path.join(FLAGS.data_dir, '*.tfrecord'))
-  
+
   with open(FLAGS.labels_csv) as f:
     df_labels = pd.read_csv(f)
   df_labels = df_labels[~df_labels[FLAGS.head_name].isna()]
@@ -106,7 +107,7 @@ def _main(_):
 
   model.save(FLAGS.save_model_name, include_optimizer=False)
   print(f"Saved trained model to file: {FLAGS.save_model_name}")
-  
+
   return
 
 
@@ -129,7 +130,7 @@ def train_model(
     head_name: The name of the head/column to train on, from `df_labels`.
     train_label: The value of the "split" column of `df_labels` that indicates a training sample.
     validate_label: The value of the "split" column of `df_labels` that indicates a validation sample.
-    model: The model to train. Defaults to the model from `train_lib.create_model` if none is specified. 
+    model: The model to train. Defaults to the model from `models.create_model` if none is specified.
     batch_size: Batch size for training.
     num_epochs: Number of epochs to train.
     save_model_name: Name for the model to save.
@@ -155,7 +156,7 @@ def train_model(
   training_labels = dict(
       zip(training_df['image_id'], training_df[head_name].astype(int))
   )
-  training_data = train_lib.get_dataset(file_names, labels=training_labels)
+  training_data = get_dataset(file_names, labels=training_labels)
 
   # Create validation Dataset
   validation_data = None
@@ -163,7 +164,7 @@ def train_model(
     validate_df = df_labels[df_labels['split'] == validate_label]
     validate_labels = dict(zip(validate_df['image_id'], validate_df[head_name].astype(int)))
     validation_data = (
-        train_lib.get_dataset(file_names, labels=validate_labels).batch(1).cache()
+        get_dataset(file_names, labels=validate_labels).batch(1).cache()
     )
 
   model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
@@ -175,7 +176,7 @@ def train_model(
       verbose=1)
 
   # Get default model if none was specified
-  model = model or train_lib.create_model([head_name])
+  model = model or create_model([head_name])
   model.fit(
       x=training_data.batch(batch_size).prefetch(tf.data.AUTOTUNE).cache(),
       validation_data=validation_data,
