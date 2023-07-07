@@ -23,6 +23,6 @@ def download_blob(bucket: Bucket, source_blob_name: str, destination_file_name: 
       return
 
     if print_name == "source":
-      print(f"Downloaded {source_blob_name}")
+      print(f"Downloaded: {source_blob_name}")
     elif print_name == "dest":
-       print(f"Downloaded {destination_file_name}")
+       print(f"Downloaded: {destination_file_name}")
