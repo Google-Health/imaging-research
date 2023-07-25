@@ -7,10 +7,9 @@
 
 1. Fill out the [API access form](https://forms.gle/SJBSawfDw19JZRA59). Your provided Gmail account will be used for access once approved for non-clinical use.
 2. Once granted you’ll get an email and can use the CXR Foundation API with your own images.
-3. You also have access to this GitHub repository containing Python source code to: 
+3. You also have access to this GitHub repository containing Python source code to:
     1. Convert DICOM images into PNGs suitable for calling CXR Foundation
     2. Call the API to generate embeddings from the PNG
-    3. Train a model given a set of embeddings and corresponding ground truth
 4. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and login
 
 	  1. Open a command line and login. This will automatically accept the [Google Cloud Platform TOS](https://cloud.google.com/terms).
@@ -23,7 +22,7 @@
 
 
 6. Install the CXR Foundation libraries in a virtual environment
-       
+
         python -m venv env
         source env/bin/activate
         pip install -r requirements.txt
@@ -35,13 +34,11 @@
 
 			python -m run_inference --input_path "gs://your/cloud/bucket/inputs/" --output_path "gs://your/cloud/bucket/outputs/" --embeddings_project gh-rad-validation-cxrembd-deid --endpoint_id 6695981832690728960 --limit 5 --input_file_type='dicom'
 
-    3. Train on the embeddings, for example (see source code for details on CSV format and args):
+See the [CXR_Foundation_Demo.ipynb](./CXR_Foundation_Demo.ipynb) and [MIMIC_Reports_Demo.ipynb](orts_Demo.ipynb) notebooks for examples of how to use the embeddings service and this package.
 
-			python -m train --train_split_name train --tune_split_name tune --labels_csv labels.csv --head_name EFFUSION --data_dir ~/your/local/dir/ --num_epochs 30
+Have questions? Email [cxr-foundation@google.com](mailto:cxr-foundation@google.com).
 
-8. Have questions? Email [cxr-foundation@google.com](mailto:cxr-foundation@google.com).
-
-**Notes**: 
+**Notes**:
 
 *   Google does not keep a copy of any images sent.
 *   Google monitors daily query volume and aggregates on a per-user and per-organization basis. Access can be revoked if a user or organization exceeds a reasonable query volume.
@@ -59,7 +56,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
 See [`LICENSE`](LICENSE) for details.
 
 ## Disclaimer
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 # Model Card for CXR Foundation

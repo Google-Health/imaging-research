@@ -32,6 +32,5 @@ setuptools.setup(
     'pydicom',
     'tf-models-official >= 2.12',
     'typing-extensions',
-    'shapely < 2.0.0'
   ],
   packages=setuptools.find_packages())
