@@ -26,11 +26,11 @@ setuptools.setup(
     'google-cloud-storage',
     'apache_beam',
     'pandas',
-    'tensorflow >= 2.12',
+    'tensorflow >= 2.13.0',
     'pillow',
     'pypng',
     'pydicom',
-    'tf-models-official >= 2.12',
+    'tf-models-official >= 2.13.0',
     'typing-extensions',
   ],
   packages=setuptools.find_packages())
