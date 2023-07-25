@@ -25,7 +25,6 @@
 
         python -m venv env
         source env/bin/activate
-        pip install -r requirements.txt
         pip install .
 
 7. Run the CXR Foundation code in your local/cloud environment and start training
