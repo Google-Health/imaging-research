@@ -30,7 +30,6 @@ setuptools.setup(
     'pillow',
     'pypng',
     'pydicom',
-    'tf-models-official >= 2.13.0',
     'typing-extensions',
   ],
   packages=setuptools.find_packages())
