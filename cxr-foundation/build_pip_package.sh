@@ -3,10 +3,6 @@ source .env/bin/activate
 
 pip install --upgrade pip
 
-pip install -r requirements.txt
-
-pip install .
-
 pip install --upgrade twine
 python setup.py sdist
 python setup.py bdist_wheel

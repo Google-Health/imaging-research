@@ -10,16 +10,15 @@
 3. You also have access to this GitHub repository containing Python source code to:
     1. Convert DICOM images into PNGs suitable for calling CXR Foundation
     2. Call the API to generate embeddings from the PNG
-4. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and login
+4. [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and log in:
 
 	  1. Open a command line and login. This will automatically accept the [Google Cloud Platform TOS](https://cloud.google.com/terms).
 
 			gcloud auth application-default login
 5. Clone the Repository into a local directory
 
-		git clone https://github.com/Google-Health/imaging-research
+		git clone https://github.com/Google-Health/imaging-research.git
 		cd imaging-research/cxr-foundation
-
 
 6. Install the CXR Foundation package:
 
@@ -27,9 +26,7 @@
 
 7. Run the CXR Foundation code:
     1. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory
-    2. Generate and export embeddings, for example:
-
-			python -m run_inference --input_path "gs://your/cloud/bucket/inputs/" --output_path "gs://your/cloud/bucket/outputs/" --embeddings_project gh-rad-validation-cxrembd-deid --endpoint_id 6695981832690728960 --limit 5 --input_file_type='dicom'
+    2. Generate and save embeddings.
 
 See the [CXR_Foundation_Demo.ipynb](./CXR_Foundation_Demo.ipynb) and [MIMIC_Reports_Demo.ipynb](orts_Demo.ipynb) notebooks for examples of how to use the embeddings service and this package.
 
