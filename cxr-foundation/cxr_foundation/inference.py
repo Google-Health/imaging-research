@@ -105,6 +105,10 @@ def generate_embeddings(input_files: Iterable[str], output_dir: str, input_type:
       continue
 
     image_example = create_example_from_image(image_file=file, input_type=input_type)
+
+    if constants.IMAGE_KEY not in image_example.features.feature:
+      raise RuntimeError("Failed to generated a usable tf.train.Example object for the embeddings service.")
+
     embeddings = generate_embedding_from_service(image_example, project=project, endpoint_id=endpoint_id)
     save_embeddings(embeddings, output_file=output_file, format=output_type, image_example=image_example)
     logging.info(f"Successfully generated {output_file}")
@@ -163,7 +167,6 @@ def generate_embedding_from_service(image_example: tf.train.Example, project:str
       location=constants.LOCATION,
       endpoint=endpoint_id)
   retry_policy = Retry(predicate=_is_retryable)
-
   response = api_client.predict(
       endpoint=endpoint, instances=instances, retry=retry_policy, timeout=60)
   return response.predictions
