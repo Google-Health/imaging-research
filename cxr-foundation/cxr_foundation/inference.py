@@ -205,4 +205,5 @@ def save_embeddings(embeddings: Sequence[float], output_file: str, format: Outpu
 
       with open(output_file, 'wb') as f:
         f.write(image_example.SerializeToString())
-    raise ValueError('Unknown file type.')
+    else:
+      raise ValueError('Unknown file type.')
