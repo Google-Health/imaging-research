@@ -66,12 +66,12 @@ def _image_id_to_filebase(image_id: str) -> str:
   filebase, _ = os.path.splitext(os.path.basename(image_id))
   return filebase
 
-def _output_file_name(input_file: str, output_path: str, format:OutputFileType) -> str:
+def _output_file_name(input_file: str, output_dir: str, format:OutputFileType) -> str:
     filebase = _image_id_to_filebase(input_file)
     if format == OutputFileType.TFRECORD:
-      return os.path.join(output_path, f"{filebase}.tfrecord")
+      return os.path.join(output_dir, f"{filebase}.tfrecord")
     elif format == OutputFileType.NPZ:
-      return os.path.join(output_path, f"{filebase}.npz")
+      return os.path.join(output_dir, f"{filebase}.npz")
     raise ValueError('Unknown file type.')
 
 
@@ -98,15 +98,16 @@ def generate_embeddings(input_files: Iterable[str], output_dir: str, input_type:
 
   """
   for file in input_files:
-    output_file = _output_file_name(file, output_dir, input_type, output_type)
+    output_file = _output_file_name(file, output_dir=output_dir, format=output_type)
 
     if not overwrite_existing and os.path.exists(output_file):
       logging.info(f"Found existing output file. Skipping: {output_file}")
       continue
 
-    image_example = create_example_from_image(file=file, input_type=input_type)
+    image_example = create_example_from_image(image_file=file, input_type=input_type)
     embeddings = generate_embedding_from_service(image_example, project=project, endpoint_id=endpoint_id)
-    save_embeddings(embeddings, output_file=output_file, format=output_type)
+    save_embeddings(embeddings, output_file=output_file, format=output_type, image_example=image_example)
+    logging.info(f"Successfully generated {output_file}")
 
 
 def create_example_from_image(image_file: str, input_type: InputFileType) -> tf.train.Example:
@@ -133,7 +134,7 @@ def _is_retryable(exc):
   return isinstance(exc, _RETRIABLE_TYPES)
 
 
-def generate_embedding_from_service(image_example: tf.train.Example, project:str, endpoint_id: int=constants.API_ENDPOINT)-> Sequence[float]:
+def generate_embedding_from_service(image_example: tf.train.Example, project:str, endpoint_id: int=constants.ENDPOINT_ID)-> Sequence[float]:
   """
   Generates embeddings from a hosted Vertex/AIPlatform model prediction endpoint.
 
@@ -193,8 +194,15 @@ def save_embeddings(embeddings: Sequence[float], output_file: str, format: Outpu
       if image_example is None:
         raise RuntimeError('Missing image_example param required for saving as tfrecord.')
 
+      # Add embeddings values to example
       image_example.features.feature[
           constants.EMBEDDING_KEY].float_list.value[:] = embeddings_array.flatten()
+
+      # Remove unnecessary existing fields to prevent serializing them
+      for key in (constants.IMAGE_FORMAT_KEY, constants.IMAGE_KEY):
+        if key in image_example.features.feature:
+          del image_example.features.feature[constants.IMAGE_KEY]
+
       with open(output_file, 'wb') as f:
         f.write(image_example.SerializeToString())
     raise ValueError('Unknown file type.')

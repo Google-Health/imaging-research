@@ -23,7 +23,7 @@ import numpy as np
 import png
 import pydicom
 from pydicom.pixel_data_handlers.util import apply_modality_lut
-import tensorflow.as tf
+import tensorflow as tf
 
 from cxr_foundation import constants
 
