@@ -188,7 +188,7 @@ def save_embeddings(embeddings: Sequence[float], output_file: str, format: Outpu
       The original Example generated from the image. This is only required if saving as .tfrecord.
 
     """
-    embeddings_array = np.array(embeddings)
+    embeddings_array = np.array(embeddings, dtype="float32").flatten()
 
     if format == OutputFileType.NPZ:
       # Keyed by "embedding"
@@ -199,7 +199,7 @@ def save_embeddings(embeddings: Sequence[float], output_file: str, format: Outpu
 
       # Add embeddings values to example
       image_example.features.feature[
-          constants.EMBEDDING_KEY].float_list.value[:] = embeddings_array.flatten()
+          constants.EMBEDDING_KEY].float_list.value[:] = embeddings_array
 
       # Remove unnecessary existing fields to prevent serializing them
       for key in (constants.IMAGE_FORMAT_KEY, constants.IMAGE_KEY):
