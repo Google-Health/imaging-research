@@ -204,9 +204,10 @@ def save_embeddings(embeddings: Sequence[float], output_file: str, format: Outpu
       # Remove unnecessary existing fields to prevent serializing them
       for key in (constants.IMAGE_FORMAT_KEY, constants.IMAGE_KEY):
         if key in image_example.features.feature:
-          del image_example.features.feature[constants.IMAGE_KEY]
+          del image_example.features.feature[key]
 
-      with open(output_file, 'wb') as f:
-        f.write(image_example.SerializeToString())
+      with tf.io.TFRecordWriter(output_file) as w:
+          w.write(image_example.SerializeToString())
+
     else:
       raise ValueError('Unknown file type.')
