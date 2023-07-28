@@ -17,6 +17,10 @@
 GCS_PREFIX = 'gs://'
 # Vertex is only in us-central1 for now.
 LOCATION = 'us-central1'
+# Endpoint ID of the embeddings endpoint
+ENDPOINT_ID = 6695981832690728960
+# GCP project ID of the embeddings endpoint
+EMBEDDINGS_PROJECT_ID = 'gh-rad-validation-cxrembd-deid'
 
 # tf.Example feature keys.
 IMAGE_KEY = 'image/encoded'
