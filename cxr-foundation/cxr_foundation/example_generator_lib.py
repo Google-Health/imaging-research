@@ -15,7 +15,6 @@
 # limitations under the License.
 """Methods to create tf.examples for model inference via pydicom."""
 
-from cxr_foundation import constants
 
 import io
 from typing import Iterable, Union
@@ -24,7 +23,9 @@ import numpy as np
 import png
 import pydicom
 from pydicom.pixel_data_handlers.util import apply_modality_lut
-import tensorflow.compat.v1 as tf
+import tensorflow.as tf
+
+from cxr_foundation import constants
 
 _BITS_PER_BYTE = 8
 _WINDOWWIDTH = 'WindowWidth'

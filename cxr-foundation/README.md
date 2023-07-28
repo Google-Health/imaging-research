@@ -21,13 +21,11 @@
 		cd imaging-research/cxr-foundation
 
 
-6. Install the CXR Foundation libraries in a virtual environment
+6. Install the CXR Foundation package:
 
-        python -m venv env
-        source env/bin/activate
         pip install .
 
-7. Run the CXR Foundation code in your local/cloud environment and start training
+7. Run the CXR Foundation code:
     1. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory
     2. Generate and export embeddings, for example:
 
