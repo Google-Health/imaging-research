@@ -23,8 +23,6 @@ setuptools.setup(
     'google-api-python-client',
     'google-apitools',
     'google-cloud-aiplatform',
-    'google-cloud-storage',
-    'apache_beam',
     'pandas',
     'tensorflow >= 2.13.0',
     'pillow',
