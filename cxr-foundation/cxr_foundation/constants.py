@@ -1,6 +1,6 @@
 # /usr/bin/python
 #
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,44 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import dataclasses
+
+# GCP project ID of the embeddings endpoint.
+_EMBEDDINGS_PROJECT_NAME = 'gh-rad-validation-cxrembd-deid'
+# Vertex was initially offered only in "us-central1".
+_LOCATION = 'us-central1'
+# ID of the embeddings endpoint.
+_ENDPOINT_ID = 6695981832690728960
+
+
+@dataclasses.dataclass(frozen=True)
+class VertexEndpoint:
+  """Vertex AI end-point configuration.
+
+  Fields
+  ------
+  project_name
+    Name of the GCP Project which hosts the model.
+  endpoint_location
+    GCP Location (Zone) where the Vertex AI end-point is hosted.
+  endpoint_id
+    Numeric ID for the hosted end-point.
+  """
+
+  project_name: str
+  endpoint_location: str
+  endpoint_id: int
+
+
+# End-point configuration for the CXR Foundation V1 model.
+ENDPOINT_V1 = VertexEndpoint(
+    project_name=_EMBEDDINGS_PROJECT_NAME,
+    endpoint_location=_LOCATION,
+    endpoint_id=_ENDPOINT_ID,
+)
+
 
 GCS_PREFIX = 'gs://'
-# Vertex is only in us-central1 for now.
-LOCATION = 'us-central1'
-# Endpoint ID of the embeddings endpoint
-ENDPOINT_ID = 6695981832690728960
-# GCP project ID of the embeddings endpoint
-EMBEDDINGS_PROJECT_ID = 'gh-rad-validation-cxrembd-deid'
 
 # tf.Example feature keys required by the embeddings service
 IMAGE_KEY = 'image/encoded'

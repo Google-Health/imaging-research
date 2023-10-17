@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # limitations under the License.
 """Collection of functions to generate embeddings."""
 import base64
-from enum import Enum
+import enum
 import io
 import logging
 import os
@@ -46,7 +46,11 @@ _VIEW_POSITION = 'ViewPosition'
 _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
 
-class InputFileType(Enum):
+class ModelVersion(enum.Enum):
+  V1  # CXR Foundation model V1.
+
+
+class InputFileType(enum.Enum):
   PNG = 'png'
   DICOM = 'dicom'
 
@@ -54,7 +58,7 @@ class InputFileType(Enum):
     return self.value
 
 
-class OutputFileType(Enum):
+class OutputFileType(enum.Enum):
   TFRECORD = 'tfrecord'
   NPZ = 'npz'
 
@@ -84,9 +88,8 @@ def generate_embeddings(
     input_type: InputFileType,
     output_type: OutputFileType,
     overwrite_existing: bool = False,
-    project: str = constants.EMBEDDINGS_PROJECT_ID,
-    endpoint_id: int = constants.ENDPOINT_ID,
-):
+    model_version: ModelVersion = ModelVersion.V1,
+) -> None:
   """Generate embedding files from a set of input image files.
 
   Parameters
@@ -100,42 +103,55 @@ def generate_embeddings(
   input_type
     The file type of the input images. DICOM or PNG.
   overwrite_existing
-    Whether to overwriting an existing output file if present, or to skip the
-    inference.
-  project
-    The GCP project ID that hosts embeddings API
-  endpoint_id
-    The numerical endpoint ID of the embeddings API
+    If an output file already exists, whether to overwrite or skip inference.
+  model_version
+    The CXR foundation model version. Only V1 is currently supported.
+
+  Raises
+  ------
+    ValueError
+      If the `model_version` is unsupported.
   """
+  if model_version != ModelVersion.V1:
+    raise ValueError(
+        'Model version {model_version.name!r} is unsupported.'
+    )
+
+  embeddings_fn = _embeddings_v1
+
   for file in input_files:
     output_file = _output_file_name(
         file, output_dir=output_dir, format=output_type
     )
 
     if not overwrite_existing and os.path.exists(output_file):
-      logging.info(f'Found existing output file. Skipping: {output_file}')
+      logging.info(f'Found existing output file. Skipping: {output_file!r}')
       continue
 
     image_example = create_example_from_image(
         image_file=file, input_type=input_type
     )
+    assert constants.IMAGE_KEY in image_example.features.feature
 
-    if constants.IMAGE_KEY not in image_example.features.feature:
-      raise RuntimeError(
-          'Failed to generated a usable tf.train.Example object for the'
-          ' embeddings service.'
-      )
+    embeddings = _embedding_fn(image_example)
 
-    embeddings = generate_embedding_from_service(
-        image_example, project=project, endpoint_id=endpoint_id
-    )
     save_embeddings(
         embeddings,
         output_file=output_file,
         format=output_type,
         image_example=image_example,
     )
-    logging.info(f'Successfully generated {output_file}')
+    logging.info(f'Successfully generated {output_file!r}')
+
+
+def _embeddings_v1(image_example: tf.train.Example) -> Sequence[float]:
+  """Create CXR Foundation V1 model embeddings."""
+  return _embedding_from_service(
+      image_example,
+      constants.ENDPOINT_V1.project_name,
+      constants.ENDPOINT_V1.endpoint_location,
+      constants.ENDPOINT_V1.endpoint_id,
+  )
 
 
 def create_example_from_image(
@@ -145,7 +161,7 @@ def create_example_from_image(
   with open(image_file, 'rb') as f:
     if input_type == InputFileType.PNG:
       img = np.asarray(Image.open(io.BytesIO(f.read())).convert('L'))
-      example = example_generator_lib.png_to_tfexample(img)
+      return example_generator_lib.png_to_tfexample(img)
     elif input_type == InputFileType.DICOM:
       dicom = pydicom.dcmread(io.BytesIO(f.read()))
       if (
@@ -157,39 +173,44 @@ def create_example_from_image(
             ' set: ',
             _FRONTAL_VIEW_POSITIONS,
         )
-      example = example_generator_lib.dicom_to_tfexample(dicom)
-    else:
-      raise ValueError('Unknown file type.')
+      return example_generator_lib.dicom_to_tfexample(dicom)
 
-  return example
+    raise ValueError('Unknown file type.')
 
 
 def _is_retryable(exc):
   return isinstance(exc, _RETRIABLE_TYPES)
 
 
-def generate_embedding_from_service(
+def _embedding_from_service(
     image_example: tf.train.Example,
-    project: str,
-    endpoint_id: int = constants.ENDPOINT_ID,
+    project_name: str,
+    location: str,
+    endpoint_id: int,
 ) -> Sequence[float]:
-  """Generates embeddings from a hosted Vertex/AIPlatform model prediction endpoint.
+  """Returns embeddings from a Vertex (AI Platform) model prediction endpoint.
 
   Parameters
   ----------
   image_example
     The Example object containing the original image bytes. The expected object
-    schema is defined by `create_example_from_image`.
-    project
-    The GCP project ID that hosts embeddings API
+    schema is defined by `create_example_from_image`. The Example proto is
+    encoded as a JSON-like Python object before transmission
+    ```
+    [
+      'b64': <base64-encoded serialized `image_example`>
+    ]
+    ```
+  project_name
+    The GCP project name that hosts embeddings API.
+  location
+    The GCP Location (Zone) where the model serving end-point is deployed.
   endpoint_id
-    The numerical endpoint ID of the embeddings API
+    The numerical endpoint ID of the embeddings API.
 
   Returns
   ------
   The image embeddings generated by the service.
-
-  TODO: Add required schema reference.
   """
   instances = [
       {'b64': base64.b64encode(image_example.SerializeToString()).decode()}
