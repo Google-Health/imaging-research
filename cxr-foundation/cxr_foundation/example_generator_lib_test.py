@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for example_generator_lib."""
+import unittest
 import example_generator_lib
-
 import numpy as np
 import pydicom
-import unittest
 
 
 class ExampleGeneratorLibTest(unittest.TestCase):

@@ -16,18 +16,19 @@
 import setuptools
 
 setuptools.setup(
-  name='cxr-foundation',
-  version='1.0.0',
-  description='CXR Foundation: chest x-ray embeddings generation.',
-  install_requires=[
-    'google-api-python-client',
-    'google-apitools',
-    'google-cloud-aiplatform',
-    'pandas',
-    'tensorflow >= 2.13.0',
-    'pillow',
-    'pypng',
-    'pydicom',
-    'typing-extensions',
-  ],
-  packages=setuptools.find_packages())
+    name='cxr-foundation',
+    version='1.0.0',
+    description='CXR Foundation: chest x-ray embeddings generation.',
+    install_requires=[
+        'google-api-python-client',
+        'google-apitools',
+        'google-cloud-aiplatform',
+        'pandas',
+        'tensorflow >= 2.13.0',
+        'pillow',
+        'pypng',
+        'pydicom',
+        'typing-extensions',
+    ],
+    packages=setuptools.find_packages(),
+)

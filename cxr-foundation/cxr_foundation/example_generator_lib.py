@@ -19,13 +19,12 @@
 import io
 from typing import Iterable, Union
 
+from cxr_foundation import constants
 import numpy as np
 import png
 import pydicom
 from pydicom.pixel_data_handlers.util import apply_modality_lut
 import tensorflow as tf
-
-from cxr_foundation import constants
 
 _BITS_PER_BYTE = 8
 _WINDOWWIDTH = 'WindowWidth'
@@ -53,15 +52,18 @@ def _encode_png(array: np.ndarray) -> bytes:
   if array.ndim != 2:
     raise ValueError(f'Array must be 2-D. Actual dimensions: {array.ndim}')
   if array.dtype.type not in supported_types:
-    raise ValueError('Pixels must be either `uint8` or `uint16`. '
-                     f'Actual type: {array.dtype.name!r}')
+    raise ValueError(
+        'Pixels must be either `uint8` or `uint16`. '
+        f'Actual type: {array.dtype.name!r}'
+    )
 
   # Actual conversion.
   writer = png.Writer(
       width=array.shape[1],
       height=array.shape[0],
       greyscale=True,
-      bitdepth=_BITS_PER_BYTE * array.dtype.itemsize)
+      bitdepth=_BITS_PER_BYTE * array.dtype.itemsize,
+  )
   output_data = io.BytesIO()
   writer.write(output_data, array.tolist())
   return output_data.getvalue()
@@ -80,11 +82,14 @@ def _rescale_dynamic_range(image: np.ndarray) -> np.ndarray:
     ValueError: If pixels are not of an integer type.
   """
   if not np.issubdtype(image.dtype, np.integer):
-    raise ValueError('Image pixels must be an integer type. '
-                     f'Actual type: {image.dtype.name!r}')
+    raise ValueError(
+        'Image pixels must be an integer type. '
+        f'Actual type: {image.dtype.name!r}'
+    )
   iinfo = np.iinfo(image.dtype)
-  return np.interp(image, (image.min(), image.max()),
-                   (iinfo.min, iinfo.max)).astype(iinfo)
+  return np.interp(
+      image, (image.min(), image.max()), (iinfo.min, iinfo.max)
+  ).astype(iinfo)
 
 
 def _shift_to_unsigned(image: np.ndarray) -> np.ndarray:
@@ -120,21 +125,26 @@ def _shift_to_unsigned(image: np.ndarray) -> np.ndarray:
       image = image * (uint16_max / np.max(image))
       image[image > uint16_max] = uint16_max
     return image.astype(np.uint16)
-  raise ValueError('Image pixels must be an 8, 16 bit integer or float type. '
-                   f'Actual type: {image.dtype.name!r}')
+  raise ValueError(
+      'Image pixels must be an 8, 16 bit integer or float type. '
+      f'Actual type: {image.dtype.name!r}'
+  )
 
 
 def _apply_pydicom_prep(ds: pydicom.Dataset) -> np.ndarray:
   """Prepares pixel data after applying data handling from pydicom."""
 
-  def window_u16(image: np.ndarray, window_center: int,
-                 window_width: int) -> np.ndarray:
+  def window_u16(
+      image: np.ndarray, window_center: int, window_width: int
+  ) -> np.ndarray:
     max_window = np.iinfo(np.uint16).max
     top_clip = window_center - 1 + window_width / 2
     bottom_clip = window_center - window_width / 2
     return np.interp(
-        image.clip(bottom_clip, top_clip), (bottom_clip, top_clip),
-        (0, max_window))
+        image.clip(bottom_clip, top_clip),
+        (bottom_clip, top_clip),
+        (0, max_window),
+    )
 
   arr = ds.pixel_array
   pixel_array = apply_modality_lut(arr, ds)
@@ -155,8 +165,9 @@ def _apply_pydicom_prep(ds: pydicom.Dataset) -> np.ndarray:
   return pixel_array
 
 
-def _assign_bytes_feature(feature: tf.train.Feature,
-                          value: Union[bytes, Iterable[bytes]]) -> None:
+def _assign_bytes_feature(
+    feature: tf.train.Feature, value: Union[bytes, Iterable[bytes]]
+) -> None:
   """Assigns a bytes float value into feature."""
   if isinstance(value, bytes):
     feature.bytes_list.value[:] = [value]
