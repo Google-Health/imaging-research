@@ -19,8 +19,17 @@ import dataclasses
 _EMBEDDINGS_PROJECT_NAME = 'gh-rad-validation-cxrembd-deid'
 # Vertex was initially offered only in "us-central1".
 _LOCATION = 'us-central1'
-# ID of the embeddings endpoint.
-_ENDPOINT_ID = 6695981832690728960
+
+# ID of the V1 embeddings endpoint.
+_V1_ENDPOINT_ID = 6695981832690728960
+# IDs of the V2 embeddings endpoints.
+<<<<<<< HEAD
+_V2_C_ENDPOINT_ID = -1
+_V2_B_ENDPOINT_ID = -1
+=======
+_V2_C_ENDPOINT_ID = 3169498397715464192
+_V2_B_ENDPOINT_ID = 3949958139389935616
+>>>>>>> 86d9971 (Add inference for V2 (ELIXR) embeddings.)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -46,7 +55,20 @@ class VertexEndpoint:
 ENDPOINT_V1 = VertexEndpoint(
     project_name=_EMBEDDINGS_PROJECT_NAME,
     endpoint_location=_LOCATION,
-    endpoint_id=_ENDPOINT_ID,
+    endpoint_id=_V1_ENDPOINT_ID,
+)
+
+
+# End-point configurations for the CXR Foundation V2 model.
+ENDPOINT_V2_C = VertexEndpoint(
+    project_name=_EMBEDDINGS_PROJECT_NAME,
+    endpoint_location=_LOCATION,
+    endpoint_id=_V2_C_ENDPOINT_ID,
+)
+ENDPOINT_V2_B = VertexEndpoint(
+    project_name=_EMBEDDINGS_PROJECT_NAME,
+    endpoint_location=_LOCATION,
+    endpoint_id=_V2_B_ENDPOINT_ID,
 )
 
 
