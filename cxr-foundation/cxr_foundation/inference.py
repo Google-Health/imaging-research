@@ -47,7 +47,7 @@ _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
 
 class ModelVersion(enum.Enum):
-  V1 = enum.auto() # CXR Foundation model V1.
+  V1 = enum.auto()  # CXR Foundation model V1.
 
 
 class InputFileType(enum.Enum):
@@ -113,9 +113,7 @@ def generate_embeddings(
       If the `model_version` is unsupported.
   """
   if model_version != ModelVersion.V1:
-    raise ValueError(
-        'Model version {model_version.name!r} is unsupported.'
-    )
+    raise ValueError('Model version {model_version.name!r} is unsupported.')
 
   embeddings_fn = _embeddings_v1
 
@@ -221,7 +219,7 @@ def _embedding_from_service(
   )
 
   endpoint = api_client.endpoint_path(
-      project=project, location=constants.LOCATION, endpoint=endpoint_id
+      project=project_name, location=location, endpoint=endpoint_id
   )
   retry_policy = Retry(predicate=_is_retryable)
   response = api_client.predict(
