@@ -113,15 +113,11 @@ def generate_embeddings(
     ValueError
       If the `model_version` is unsupported.
   """
-<<<<<<< HEAD
-  if model_version != ModelVersion.V1:
-=======
   if model_version == ModelVersion.V1:
     embeddings_fn = _embeddings_v1
   elif model_version == ModelVersion.V2:
     embeddings_fn = _embeddings_v2
   else:
->>>>>>> 86d9971 (Add inference for V2 (ELIXR) embeddings.)
     raise ValueError('Model version {model_version.name!r} is unsupported.')
 
 
