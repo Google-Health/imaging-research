@@ -23,13 +23,8 @@ _LOCATION = 'us-central1'
 # ID of the V1 embeddings endpoint.
 _V1_ENDPOINT_ID = 6695981832690728960
 # IDs of the V2 embeddings endpoints.
-<<<<<<< HEAD
-_V2_C_ENDPOINT_ID = -1
-_V2_B_ENDPOINT_ID = -1
-=======
 _V2_C_ENDPOINT_ID = 3169498397715464192
 _V2_B_ENDPOINT_ID = 3949958139389935616
->>>>>>> 86d9971 (Add inference for V2 (ELIXR) embeddings.)
 
 
 @dataclasses.dataclass(frozen=True)
