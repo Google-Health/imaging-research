@@ -120,7 +120,6 @@ def generate_embeddings(
   else:
     raise ValueError('Model version {model_version.name!r} is unsupported.')
 
-
   for file in input_files:
     output_file = _output_file_name(
         file, output_dir=output_dir, format=output_type
@@ -164,12 +163,13 @@ def _embeddings_v2(image_example: tf.train.Example) -> Sequence[float]:
   - Query ELIXR-B with the embedding from the previous step to obtain a semantic
     embedding for the text generation model.
   """
-  elixr_c_embedding = _embedding_from_service(
+  elixr_c_response = _embedding_from_service(
       image_example,
       constants.ENDPOINT_V2_C.project_name,
       constants.ENDPOINT_V2_C.endpoint_location,
       constants.ENDPOINT_V2_C.endpoint_id,
   )
+  elixr_c_embedding = np.expand_dims(np.array(elixr_c_response[0]), axis=0)
   assert elixr_c_embedding.shape == (1, 8, 8, 1376)
   return _embedding_from_service(
       elixr_c_embedding,
