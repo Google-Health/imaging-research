@@ -47,7 +47,7 @@ _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
 
 class ModelVersion(enum.Enum):
-  V1  # CXR Foundation model V1.
+  V1 = enum.auto() # CXR Foundation model V1.
 
 
 class InputFileType(enum.Enum):
