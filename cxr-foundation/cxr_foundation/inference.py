@@ -133,7 +133,7 @@ def generate_embeddings(
     )
     assert constants.IMAGE_KEY in image_example.features.feature
 
-    embeddings = _embedding_fn(image_example)
+    embeddings = _embeddings_fn(image_example)
 
     save_embeddings(
         embeddings,
