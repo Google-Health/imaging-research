@@ -265,7 +265,7 @@ def _embedding_from_service(
   )
 
   endpoint = api_client.endpoint_path(
-      project=project, location=constants.LOCATION, endpoint=endpoint_id
+      project=project_name, location=location, endpoint=endpoint_id
   )
   retry_policy = Retry(predicate=_is_retryable)
   response = api_client.predict(
