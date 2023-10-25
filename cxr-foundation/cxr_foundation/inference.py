@@ -147,7 +147,7 @@ def generate_embeddings(
 
 def _embeddings_v1(image_example: tf.train.Example) -> Sequence[float]:
   """Create CXR Foundation V1 model embeddings."""
-  return _embedding_from_service(
+  return _embeddings_from_service(
       image_example,
       constants.ENDPOINT_V1.project_name,
       constants.ENDPOINT_V1.endpoint_location,
@@ -163,7 +163,7 @@ def _embeddings_v2(image_example: tf.train.Example) -> Sequence[float]:
   - Query ELIXR-B with the embedding from the previous step to obtain a semantic
     embedding for the text generation model.
   """
-  elixr_c_response = _embedding_from_service(
+  elixr_c_response = _embeddings_from_service(
       image_example,
       constants.ENDPOINT_V2_C.project_name,
       constants.ENDPOINT_V2_C.endpoint_location,
@@ -171,7 +171,7 @@ def _embeddings_v2(image_example: tf.train.Example) -> Sequence[float]:
   )
   elixr_c_embedding = np.expand_dims(np.array(elixr_c_response[0]), axis=0)
   assert elixr_c_embedding.shape == (1, 8, 8, 1376)
-  return _embedding_from_service(
+  return _embeddings_from_service(
       elixr_c_embedding,
       constants.ENDPOINT_V2_B.project_name,
       constants.ENDPOINT_V2_B.endpoint_location,
@@ -207,7 +207,7 @@ def _is_retryable(exc):
   return isinstance(exc, _RETRIABLE_TYPES)
 
 
-def _embedding_from_service(
+def _embeddings_from_service(
     example_or_array: Union[np.ndarray, tf.train.Example],
     project_name: str,
     location: str,
@@ -251,7 +251,7 @@ def _embedding_from_service(
   """
   if type(example_or_array) == tf.train.Example:
     instances = [
-        {'b64': base64.b64encode(image_example.SerializeToString()).decode()}
+        {'b64': base64.b64encode(example_or_array.SerializeToString()).decode()}
     ]
   elif type(example_or_array) == np.ndarray:
     instances = [{'image_feature': example_or_array.tolist()}]
