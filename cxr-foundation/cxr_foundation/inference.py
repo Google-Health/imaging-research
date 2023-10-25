@@ -19,7 +19,7 @@ import enum
 import io
 import logging
 import os
-from typing import Iterable, Sequence, Union
+from typing import Any, Iterable, Sequence, Union
 
 from cxr_foundation import constants
 from cxr_foundation import example_generator_lib
