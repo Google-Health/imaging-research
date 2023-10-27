@@ -19,7 +19,7 @@ import enum
 import io
 import logging
 import os
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Sequence, Union
 
 from cxr_foundation import constants
 from cxr_foundation import example_generator_lib
@@ -45,9 +45,14 @@ _API_ENDPOINT = 'us-central1-aiplatform.googleapis.com'
 _VIEW_POSITION = 'ViewPosition'
 _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
+_ELIXR_B_RESPONSE_KEY = 'img_emb'
+_ELIXR_B_RESPONSE_SHAPE = (32, 768)
+_ELIXR_C_RESPONSE_SHAPE = (1, 8, 8, 1376)
+
 
 class ModelVersion(enum.Enum):
   V1 = enum.auto()  # CXR Foundation model V1.
+  V2 = enum.auto()  # 2-stage ELIXR model.
 
 
 class InputFileType(enum.Enum):
@@ -105,17 +110,19 @@ def generate_embeddings(
   overwrite_existing
     If an output file already exists, whether to overwrite or skip inference.
   model_version
-    The CXR foundation model version. Only V1 is currently supported.
+    The CXR foundation model version.
 
   Raises
   ------
     ValueError
       If the `model_version` is unsupported.
   """
-  if model_version != ModelVersion.V1:
+  if model_version == ModelVersion.V1:
+    embeddings_fn = embeddings_v1
+  elif model_version == ModelVersion.V2:
+    embeddings_fn = embeddings_v2
+  else:
     raise ValueError('Model version {model_version.name!r} is unsupported.')
-
-  embeddings_fn = _embeddings_v1
 
   for file in input_files:
     output_file = _output_file_name(
@@ -142,14 +149,69 @@ def generate_embeddings(
     logging.info(f'Successfully generated {output_file!r}')
 
 
-def _embeddings_v1(image_example: tf.train.Example) -> Sequence[float]:
-  """Create CXR Foundation V1 model embeddings."""
-  return _embedding_from_service(
+def embeddings_v1(image_example: tf.train.Example) -> np.ndarray:
+  """Create CXR Foundation V1 model embeddings.
+
+  Parameters
+  ----------
+  image_example: TF Example with image bytes.
+
+  Returns
+  -------
+  NumPy array of shape (1376,).
+  """
+  response = _embeddings_from_service(
       image_example,
       constants.ENDPOINT_V1.project_name,
       constants.ENDPOINT_V1.endpoint_location,
       constants.ENDPOINT_V1.endpoint_id,
   )
+  assert len(response) == 1
+  assert len(response[0]) == 1
+  embeddings = np.array(response[0][0], dtype=np.float32)
+  assert embeddings.shape == (1376,)
+  return embeddings
+
+
+def embeddings_v2(image_example: tf.train.Example) -> np.ndarray:
+  """Create CXR Foundation V2 model embeddings.
+
+  This is a two-step process:
+  - Query ELIXR-C for a 1x8x8x1376 dimension embedding.
+  - Query ELIXR-B with the embedding from the previous step to obtain a semantic
+    embedding for the text generation model.
+
+  Parameters
+  ----------
+  image_example: TF Example with image bytes.
+
+  Returns
+  -------
+  NumPy array of shape (32, 768).
+  """
+  elixr_c_response = _embeddings_from_service(
+      image_example,
+      constants.ENDPOINT_V2_C.project_name,
+      constants.ENDPOINT_V2_C.endpoint_location,
+      constants.ENDPOINT_V2_C.endpoint_id,
+  )
+  elixr_c_embedding = np.expand_dims(
+      np.array(elixr_c_response[0], dtype=np.float32), axis=0
+  )
+  assert elixr_c_embedding.shape == _ELIXR_C_RESPONSE_SHAPE
+  elixr_b_response = _embeddings_from_service(
+      elixr_c_embedding,
+      constants.ENDPOINT_V2_B.project_name,
+      constants.ENDPOINT_V2_B.endpoint_location,
+      constants.ENDPOINT_V2_B.endpoint_id,
+  )
+  assert len(elixr_b_response) == 1
+  assert _ELIXR_B_RESPONSE_KEY in elixr_b_response[0]
+  elixr_b_embedding = np.array(
+      elixr_b_response[0][_ELIXR_B_RESPONSE_KEY], dtype=np.float32
+  )
+  assert elixr_b_embedding.shape == _ELIXR_B_RESPONSE_SHAPE
+  return elixr_b_embedding
 
 
 def create_example_from_image(
@@ -180,23 +242,30 @@ def _is_retryable(exc):
   return isinstance(exc, _RETRIABLE_TYPES)
 
 
-def _embedding_from_service(
-    image_example: tf.train.Example,
+def _embeddings_from_service(
+    example_or_array: Union[np.ndarray, tf.train.Example],
     project_name: str,
     location: str,
     endpoint_id: int,
-) -> Sequence[float]:
+) -> Any:
   """Returns embeddings from a Vertex (AI Platform) model prediction endpoint.
 
   Parameters
   ----------
-  image_example
-    The Example object containing the original image bytes. The expected object
-    schema is defined by `create_example_from_image`. The Example proto is
-    encoded as a JSON-like Python object before transmission
+  example_or_array
+    The input is encoded as a JSON-like Python object before transmission.
+    If this is a tf.train.Example, it should contain the original image bytes.
+    The expected object schema is defined by `create_example_from_image`. The
+    Example proto is encoded as:
     ```
     [
       'b64': <base64-encoded serialized `image_example`>
+    ]
+    ```
+    A NumPy array is converted to a list and encoded as:
+    ```
+    [
+      'image_feature': array.tolist()
     ]
     ```
   project_name
@@ -208,11 +277,26 @@ def _embedding_from_service(
 
   Returns
   ------
-  The image embeddings generated by the service.
+  The image embeddings generated by the service. Differences in Vertex
+  end-point configurations may change the return type. The caller is
+  responsible for interpreting this value and extracting the requisite
+  data.
+
+  Raises
+  ------
+    TypeError
+      If `example_or_array` is neither an Example nor a NumPy array.
   """
-  instances = [
-      {'b64': base64.b64encode(image_example.SerializeToString()).decode()}
-  ]
+  if type(example_or_array) == tf.train.Example:
+    instances = [
+        {'b64': base64.b64encode(example_or_array.SerializeToString()).decode()}
+    ]
+  elif type(example_or_array) == np.ndarray:
+    instances = [{'image_feature': example_or_array.tolist()}]
+  else:
+    raise TypeError(
+        f'Unsupported `example_or_array` type: {type(example_or_array)}'
+    )
 
   api_client = aiplatform.gapic.PredictionServiceClient(
       client_options=ClientOptions(api_endpoint=_API_ENDPOINT)
@@ -229,7 +313,7 @@ def _embedding_from_service(
 
 
 def save_embeddings(
-    embeddings: Sequence[float],
+    embeddings: np.ndarray,
     output_file: str,
     format: OutputFileType,
     image_example: tf.train.Example = None,
@@ -248,7 +332,7 @@ def save_embeddings(
     The original Example generated from the image. This is only required if
     saving as .tfrecord.
   """
-  embeddings_array = np.array(embeddings, dtype='float32').flatten()
+  embeddings_array = embeddings.astype(np.float32).flatten()
 
   if format == OutputFileType.NPZ:
     # Keyed by "embedding"
