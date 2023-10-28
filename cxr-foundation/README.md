@@ -34,6 +34,10 @@ See the notebooks for examples of how to use the embeddings service and this pac
 
 Have questions? Email [cxr-foundation@google.com](mailto:cxr-foundation@google.com).
 
+## Third Party Apps
+
+CXR Foundation is also available on [Superbio.ai](https://app.superbio.ai/apps/247?id=640613393e3000de4dfb424d) as an online app. After agreeing to Google’s Terms for the CXR Foundation tool, you can access and utilize the app.
+
 ## Package APIs - Generating and Using Embeddings
 
 The following code block highlights the pertinent functions. See the notebooks for demo usage.
