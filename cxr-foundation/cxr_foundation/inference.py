@@ -31,6 +31,7 @@ import numpy as np
 from PIL import Image
 import pydicom
 import tensorflow as tf
+import tensorflow_text as tf_text
 import tensorflow_hub as hub
 
 _RETRIABLE_TYPES = (
