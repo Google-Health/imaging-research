@@ -29,6 +29,7 @@ setuptools.setup(
         'pypng',
         'pydicom',
         'typing-extensions',
+        'tensorflow-hub',
     ],
     packages=setuptools.find_packages(),
 )
