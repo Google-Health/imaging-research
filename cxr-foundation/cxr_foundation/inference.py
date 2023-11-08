@@ -47,8 +47,8 @@ _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
 _ELIXR_B_RESPONSE_SHAPE = {
   'img_emb': (32, 768),
-  'all_contrastive_img_emb': (32, 128)
-  'contrastive_txt_emb': (128, )
+  'all_contrastive_img_emb': (32, 128),
+  'contrastive_txt_emb': (128,),
 }
 _ELIXR_C_RESPONSE_SHAPE = (1, 8, 8, 1376)
 
