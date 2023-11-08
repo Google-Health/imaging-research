@@ -55,7 +55,7 @@ _ELIXR_C_RESPONSE_SHAPE = (1, 8, 8, 1376)
 class ModelVersion(enum.Enum):
   V1 = enum.auto()  # CXR Foundation model V1.
   V2 = enum.auto()  # Data efficient classification output from 2-stage ELIXR model.
-  V2_CONTRASTIVE = = enum.auto() # Contrastive output from 2-stage ELIXR model.
+  V2_CONTRASTIVE = enum.auto() # Contrastive output from 2-stage ELIXR model.
 
 
 class InputFileType(enum.Enum):
