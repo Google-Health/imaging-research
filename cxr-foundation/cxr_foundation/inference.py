@@ -245,7 +245,7 @@ def tokenize(preprocessor, text):
   ids = np.expand_dims(ids, axis=1)
   paddings = np.expand_dims(paddings, axis=1)
   assert ids.shape == (1, 1, 128)
-  assert padding.shape == (1, 1, 128)
+  assert paddings.shape == (1, 1, 128)
   return ids, paddings
 
 
