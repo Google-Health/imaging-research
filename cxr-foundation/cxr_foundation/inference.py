@@ -31,7 +31,7 @@ import numpy as np
 from PIL import Image
 import pydicom
 import tensorflow as tf
-
+import tensorflow_hub as hub
 
 _RETRIABLE_TYPES = (
     exceptions.TooManyRequests,  # HTTP 429
@@ -48,6 +48,7 @@ _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 _ELIXR_B_RESPONSE_SHAPE = {
   'img_emb': (32, 768),
   'all_contrastive_img_emb': (32, 128)
+  'contrastive_txt_emb': (128, )
 }
 _ELIXR_C_RESPONSE_SHAPE = (1, 8, 8, 1376)
 
@@ -230,6 +231,47 @@ def embeddings_v2(image_example: tf.train.Example, fetch_key: str) -> np.ndarray
   )
   assert elixr_b_embedding.shape == _ELIXR_B_RESPONSE_SHAPE[fetch_key]
   return elixr_b_embedding
+
+
+def tokenize(preprocessor, text):
+  out = preprocessor(tf.constant([text]))
+  ids = out['input_word_ids'].numpy().astype(np.int32)
+  masks = out['input_mask'].numpy().astype(np.float32)
+  paddings = 1.0 - masks
+  end_token_idx = ids == 102
+  ids[end_token_idx] = 0
+  paddings[end_token_idx] = 1.0
+  ids = np.expand_dims(ids, axis=1)
+  paddings = np.expand_dims(paddings, axis=1)
+  assert ids.shape == (1, 1, 128)
+  assert padding.shape = (1, 1, 128)
+  return ids, paddings
+
+
+def generate_elixr_text_embeddings(text):
+  preprocessor = hub.KerasLayer(
+      "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3")
+  text = text.lower()
+  ids, paddings = tokenize(preprocessor, text)
+  instance =  {
+      # dummy image input
+      'image_feature': np.zeros([1, 8, 8, 1376], dtype=np.float32).tolist(),
+      'ids': ids.tolist(),
+      'paddings': paddings.tolist(),
+  }
+  response = _embeddings_from_service(
+      instance,
+      constants.ENDPOINT_V2_B.project_name,
+      constants.ENDPOINT_V2_B.endpoint_location,
+      constants.ENDPOINT_V2_B.endpoint_id,
+  )
+  assert len(response) == 1
+  assert 'contrastive_txt_emb' in response[0]
+  embedding = np.array(
+      response[0]['contrastive_txt_emb'], dtype=np.float32
+  )
+  assert embedding.shape == _ELIXR_B_RESPONSE_SHAPE['contrastive_txt_emb']
+  return embedding
 
 
 def create_example_from_image(
