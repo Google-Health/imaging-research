@@ -199,8 +199,11 @@ def embeddings_v2(image_example: tf.train.Example, fetch_key: str) -> np.ndarray
   NumPy array of shape (32, 768). For data efficient learning features. OR
   NumPy array of shape (32, 128). For image-text aligned contrastive features.
   """
+  instance = {
+      'b64': base64.b64encode(image_example.SerializeToString()).decode()
+  }
   elixr_c_response = _embeddings_from_service(
-      image_example,
+      instance,
       constants.ENDPOINT_V2_C.project_name,
       constants.ENDPOINT_V2_C.endpoint_location,
       constants.ENDPOINT_V2_C.endpoint_id,
