@@ -31,7 +31,8 @@ import numpy as np
 from PIL import Image
 import pydicom
 import tensorflow as tf
-
+import tensorflow_text as tf_text
+import tensorflow_hub as hub
 
 _RETRIABLE_TYPES = (
     exceptions.TooManyRequests,  # HTTP 429
@@ -45,14 +46,18 @@ _API_ENDPOINT = 'us-central1-aiplatform.googleapis.com'
 _VIEW_POSITION = 'ViewPosition'
 _FRONTAL_VIEW_POSITIONS = ('AP', 'PA')
 
-_ELIXR_B_RESPONSE_KEY = 'img_emb'
-_ELIXR_B_RESPONSE_SHAPE = (32, 768)
+_ELIXR_B_RESPONSE_SHAPE = {
+  'img_emb': (32, 768),
+  'all_contrastive_img_emb': (32, 128),
+  'contrastive_txt_emb': (128,),
+}
 _ELIXR_C_RESPONSE_SHAPE = (1, 8, 8, 1376)
 
 
 class ModelVersion(enum.Enum):
   V1 = enum.auto()  # CXR Foundation model V1.
-  V2 = enum.auto()  # 2-stage ELIXR model.
+  V2 = enum.auto()  # Data efficient classification output from 2-stage ELIXR model.
+  V2_CONTRASTIVE = enum.auto() # Contrastive output from 2-stage ELIXR model.
 
 
 class InputFileType(enum.Enum):
@@ -120,7 +125,9 @@ def generate_embeddings(
   if model_version == ModelVersion.V1:
     embeddings_fn = embeddings_v1
   elif model_version == ModelVersion.V2:
-    embeddings_fn = embeddings_v2
+    embeddings_fn = lambda x: embeddings_v2(x, 'img_emb')
+  elif model_version == ModelVersion.V2_CONTRASTIVE:
+    embeddings_fn = lambda x: embeddings_v2(x, 'all_contrastive_img_emb')
   else:
     raise ValueError('Model version {model_version.name!r} is unsupported.')
 
@@ -160,8 +167,11 @@ def embeddings_v1(image_example: tf.train.Example) -> np.ndarray:
   -------
   NumPy array of shape (1376,).
   """
+  instance = {
+      'b64': base64.b64encode(image_example.SerializeToString()).decode()
+  } 
   response = _embeddings_from_service(
-      image_example,
+      instance,
       constants.ENDPOINT_V1.project_name,
       constants.ENDPOINT_V1.endpoint_location,
       constants.ENDPOINT_V1.endpoint_id,
@@ -173,7 +183,7 @@ def embeddings_v1(image_example: tf.train.Example) -> np.ndarray:
   return embeddings
 
 
-def embeddings_v2(image_example: tf.train.Example) -> np.ndarray:
+def embeddings_v2(image_example: tf.train.Example, fetch_key: str) -> np.ndarray:
   """Create CXR Foundation V2 model embeddings.
 
   This is a two-step process:
@@ -184,13 +194,18 @@ def embeddings_v2(image_example: tf.train.Example) -> np.ndarray:
   Parameters
   ----------
   image_example: TF Example with image bytes.
+  fetch_key: which output to fetch from the inference results.
 
   Returns
   -------
-  NumPy array of shape (32, 768).
+  NumPy array of shape (32, 768). For data efficient learning features. OR
+  NumPy array of shape (32, 128). For image-text aligned contrastive features.
   """
+  instance = {
+      'b64': base64.b64encode(image_example.SerializeToString()).decode()
+  }
   elixr_c_response = _embeddings_from_service(
-      image_example,
+      instance,
       constants.ENDPOINT_V2_C.project_name,
       constants.ENDPOINT_V2_C.endpoint_location,
       constants.ENDPOINT_V2_C.endpoint_id,
@@ -199,19 +214,65 @@ def embeddings_v2(image_example: tf.train.Example) -> np.ndarray:
       np.array(elixr_c_response[0], dtype=np.float32), axis=0
   )
   assert elixr_c_embedding.shape == _ELIXR_C_RESPONSE_SHAPE
+  instance = {
+    'image_feature': elixr_c_embedding.tolist(),
+    'ids': np.zeros((1, 1, 128), dtype=np.int32).tolist(),
+    'paddings': np.zeros((1, 1, 128), dtype=np.float32).tolist(),
+  }
   elixr_b_response = _embeddings_from_service(
-      elixr_c_embedding,
+      instance,
       constants.ENDPOINT_V2_B.project_name,
       constants.ENDPOINT_V2_B.endpoint_location,
       constants.ENDPOINT_V2_B.endpoint_id,
   )
   assert len(elixr_b_response) == 1
-  assert _ELIXR_B_RESPONSE_KEY in elixr_b_response[0]
+  assert fetch_key in elixr_b_response[0]
   elixr_b_embedding = np.array(
-      elixr_b_response[0][_ELIXR_B_RESPONSE_KEY], dtype=np.float32
+      elixr_b_response[0][fetch_key], dtype=np.float32
   )
-  assert elixr_b_embedding.shape == _ELIXR_B_RESPONSE_SHAPE
+  assert elixr_b_embedding.shape == _ELIXR_B_RESPONSE_SHAPE[fetch_key]
   return elixr_b_embedding
+
+
+def tokenize(preprocessor, text):
+  out = preprocessor(tf.constant([text]))
+  ids = out['input_word_ids'].numpy().astype(np.int32)
+  masks = out['input_mask'].numpy().astype(np.float32)
+  paddings = 1.0 - masks
+  end_token_idx = ids == 102
+  ids[end_token_idx] = 0
+  paddings[end_token_idx] = 1.0
+  ids = np.expand_dims(ids, axis=1)
+  paddings = np.expand_dims(paddings, axis=1)
+  assert ids.shape == (1, 1, 128)
+  assert paddings.shape == (1, 1, 128)
+  return ids, paddings
+
+
+def generate_elixr_text_embeddings(text):
+  preprocessor = hub.KerasLayer(
+      "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3")
+  text = text.lower()
+  ids, paddings = tokenize(preprocessor, text)
+  instance =  {
+      # dummy image input
+      'image_feature': np.zeros([1, 8, 8, 1376], dtype=np.float32).tolist(),
+      'ids': ids.tolist(),
+      'paddings': paddings.tolist(),
+  }
+  response = _embeddings_from_service(
+      instance,
+      constants.ENDPOINT_V2_B.project_name,
+      constants.ENDPOINT_V2_B.endpoint_location,
+      constants.ENDPOINT_V2_B.endpoint_id,
+  )
+  assert len(response) == 1
+  assert 'contrastive_txt_emb' in response[0]
+  embedding = np.array(
+      response[0]['contrastive_txt_emb'], dtype=np.float32
+  )
+  assert embedding.shape == _ELIXR_B_RESPONSE_SHAPE['contrastive_txt_emb']
+  return embedding
 
 
 def create_example_from_image(
@@ -243,7 +304,7 @@ def _is_retryable(exc):
 
 
 def _embeddings_from_service(
-    example_or_array: Union[np.ndarray, tf.train.Example],
+    instance: dict[Any, Any],
     project_name: str,
     location: str,
     endpoint_id: int,
@@ -252,22 +313,8 @@ def _embeddings_from_service(
 
   Parameters
   ----------
-  example_or_array
-    The input is encoded as a JSON-like Python object before transmission.
-    If this is a tf.train.Example, it should contain the original image bytes.
-    The expected object schema is defined by `create_example_from_image`. The
-    Example proto is encoded as:
-    ```
-    [
-      'b64': <base64-encoded serialized `image_example`>
-    ]
-    ```
-    A NumPy array is converted to a list and encoded as:
-    ```
-    [
-      'image_feature': array.tolist()
-    ]
-    ```
+  instance
+    dict type input instance for prediction.
   project_name
     The GCP project name that hosts embeddings API.
   location
@@ -277,27 +324,11 @@ def _embeddings_from_service(
 
   Returns
   ------
-  The image embeddings generated by the service. Differences in Vertex
+  The embeddings generated by the service. Differences in Vertex
   end-point configurations may change the return type. The caller is
   responsible for interpreting this value and extracting the requisite
   data.
-
-  Raises
-  ------
-    TypeError
-      If `example_or_array` is neither an Example nor a NumPy array.
   """
-  if type(example_or_array) == tf.train.Example:
-    instances = [
-        {'b64': base64.b64encode(example_or_array.SerializeToString()).decode()}
-    ]
-  elif type(example_or_array) == np.ndarray:
-    instances = [{'image_feature': example_or_array.tolist()}]
-  else:
-    raise TypeError(
-        f'Unsupported `example_or_array` type: {type(example_or_array)}'
-    )
-
   api_client = aiplatform.gapic.PredictionServiceClient(
       client_options=ClientOptions(api_endpoint=_API_ENDPOINT)
   )
@@ -307,7 +338,7 @@ def _embeddings_from_service(
   )
   retry_policy = Retry(predicate=_is_retryable)
   response = api_client.predict(
-      endpoint=endpoint, instances=instances, retry=retry_policy, timeout=60
+      endpoint=endpoint, instances=[instance], retry=retry_policy, timeout=60
   )
   return response.predictions
 
