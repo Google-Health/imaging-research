@@ -100,7 +100,7 @@ NOTE: The demo Colab demonstrates how to call the API using short-lived access t
 
 1. Modify the demo Colab to point to your data:
 
-# TODO(armant): please add  a direct link to the relevant code cell in the Colab
+# Coming Soon: A direct link to the relevant code cell in the Colab
 
   * To use your training labels, replace `hai-cd3-foundations-pathology-vault-entry` with the name of your GCS bucket.
 
