@@ -32,7 +32,7 @@ You have the option to request access to the API either as [an individual](#as-a
 
 * YOUR-GROUP-NAME@YOUR-DOMAIN
 * INDIVIDUAL-ID@YOUR-DOMAIN
-* <span>INDIVIDUAL-ID@gmail.com</span> (not recommended for more involved research projects at large organizations)
+* INDIVIDUAL-ID@gmail[]().com (not recommended for more involved research projects at large organizations)
 
 ### As a group (recommended)
 If your organization is a Google Workspace or Google Cloud Platform (GCP) customer, contact your Google admin and ask them to create a group with the list of individuals who will be using the API. Let them know that this group is used for contacting you and also as a security principal for authorizing your access to the API.
