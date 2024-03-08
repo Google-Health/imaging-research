@@ -1,15 +1,8 @@
 # Path Foundation
 
-Path Foundation is a tool that enables users to transform pathology imaging
-into a machine learning representation, embeddings. Embeddings are a list of
-floating point values that represent a projection of the original image into a
-compressed feature space. These embeddings can be used to develop custom
-machine learning models for pathology use-cases with less data and compute
-compared to traditional model development methods.
+Path Foundation is a tool that enables users to transform pathology images into a machine learning representation of the images known as embeddings. Embeddings are a list of floating point values that represent a projection of the original image into a compressed feature space. This tool utilizes a model trained via self-supervised learning (see model card below) in order to create embeddings for image patches from histopathology whole slide images (WSIs). These embeddings can be used to develop custom machine learning models for pathology use-cases using less data and compute compared to traditional model development methods.
 
-You can read more about the research and underlying model in our recent
-publication
-[Domain-specific optimization and diverse evaluation of self-supervised models for histopathology](https://arxiv.org/abs/2310.13259).
+You can read more about the research and underlying model in our recent manuscript:  [Domain-specific optimization and diverse evaluation of self-supervised models for histopathology](https://arxiv.org/abs/2310.13259).
 
 ## How to use the Path Foundation API
 
@@ -32,7 +25,7 @@ You have the option to request access to the API either as [an individual](#as-a
 
 * YOUR-GROUP-NAME@YOUR-DOMAIN
 * INDIVIDUAL-ID@YOUR-DOMAIN
-* INDIVIDUAL-ID@gmail[]().com (not recommended for more involved research projects at large organizations)
+* INDIVIDUAL-ID@gmail.com (not recommended for more involved research projects at large organizations)
 
 ### As a group (recommended)
 If your organization is a Google Workspace or Google Cloud Platform (GCP) customer, contact your Google admin and ask them to create a group with the list of individuals who will be using the API. Let them know that this group is used for contacting you and also as a security principal for authorizing your access to the API.
@@ -100,7 +93,7 @@ NOTE: The demo Colab demonstrates how to call the API using short-lived access t
 
 1. Modify the demo Colab to point to your data:
 
-# Coming Soon: A direct link to the relevant code cell in the Colab
+# TODO(armant): please add  a direct link to the relevant code cell in the Colab
 
   * To use your training labels, replace `hai-cd3-foundations-pathology-vault-entry` with the name of your GCS bucket.
 
@@ -153,13 +146,13 @@ the preprint [manuscript](https://arxiv.org/abs/2310.13259).
 
 
 ### Intended Use
-The PathSSL model can reduce the training data, compute, and technical expertise
+* The PathSSL model can reduce the training data, compute, and technical expertise
 necessary to develop task-specific models for H&E pathology slides.
-Embeddings from the model can be used for a variety of user-defined downstream
+* Embeddings from the model can be used for a variety of user-defined downstream
 tasks including, but not limited to:  cancer detection, classification, and
 grading; metadata prediction (stain, tissue type, specimen type, etc.); and
 quality assessment (e.g., imaging artifacts).
-The embeddings can also be used to explore the feature space of histopathology
+* The embeddings can also be used to explore the feature space of histopathology
 images for biomarker development associated with prognostic and predictive
 tasks.
 
@@ -188,21 +181,4 @@ Training dataset is a de-identified public dataset and pathology imaging (pixel
 data) does not contain PHI.
 
 ### Limitations
-Intended for research purposes only
-The model has only been validated for a limited number of the potential
-downstream tasks involving H&E histopathology interpretation that this model
-could be used for. Task-specific validation remains an important aspect of
-model development by the end-user.
-This version model was trained and validated only on H&E images from a limited
-set of scanners and countries. Model output may not generalize well to data
-from other image types, patient populations, or scanner manufacturers not used
-in training.
-Training and validation was performed on patches corresponding to 5x, 10x, and
-20x magnification (~2 µm/pixel, ~1 µm/pixel, ~0.5 µm/pixel, respectively).
-Using input patches corresponding to magnifications other than these has not
-been evaluated.
-The model is only used to generate embeddings of the user-owned dataset. It
-does not generate any predictions or diagnosis on its own
-Developers should ensure any downstream model developed using this tool is
-validated to ensure performance is consistent against intended use demographics
-and image characteristics e.g., age, sex, gender, scanner etc.
+Intended for research purposes only. The model has only been validated for a limited number of the many potential downstream tasks involving H&E histopathology. This model version was trained and validated only on H&E images from a limited set of scanners and countries. Model output may not generalize well to data from other image types, patient populations, or scanner manufacturers not used in training. Task-specific validation remains an important aspect of model development by the end-user. Training and validation was performed on patches corresponding to 5x, 10x, and 20x magnification (~2 µm/pixel, ~1 µm/pixel, ~0.5 µm/pixel, respectively). Using input patches corresponding to magnifications other than these has not been evaluated. The model is only used to generate embeddings of user-owned data or the provided, publicly available data. It does not generate any predictions or diagnosis on its own. As with any research, developers should ensure any downstream application is validated to understand performance using data that is appropriately representative of the intended use setting (e.g., age, sex, gender, condition, scanner, etc.).
