@@ -8,111 +8,46 @@ compared to traditional model development methods.
 
 ## How to use the Derm Foundation API
 
-1.  [Decide how to gain access](#how-to-gain-access)
+1.  Decide if you want to get access as an individual or group. For more information see [Access Options](#access-options)
 
 1.  With the individual or group email identity at hand from the previous step,
-    fill out the [API access form](https://forms.gle/VBFuzSJXhQjNmF776). Your
-    provided Google account or service account will be used for access once
-    approved for non-clinical use.
+    fill out the [API access form](https://forms.gle/VBFuzSJXhQjNmF776).
 
 1.  Once access is granted, you’ll be notified via the provided email address
     and can start using the API.
 
-1.  The [demo ipynb](derm_foundation_demo.ipynb) shows you how to use the API to
+1.  The [Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/derm-foundation/derm_foundation_demo.ipynb) shows you how to use the API to
     train a sample model [with our test data](#use-our-test-data). You can
-    modify the ipynb to develop a custom model using
-    [your own images](#use-your-own-images). This ipynb provides an example of
+    modify the Demo Notebook to train a model using
+    [your own images](#use-your-own-images). This Notebook provides an example of
     the following steps:
 
     *   Generating a temporary access token to grant the API access to images in
         GCS.
-    *   Calling the API with the GCS bucket name, GCS object path, and the
+    *   Calling the API with a given GCS bucket name, GCS object path, and the
         access token.
     *   Saving the embedding.
-    *   Using the embeddings to train a model.
+    *   Using the embeddings to train a simple model.
+    *   Evaluate the results of the model
 
 1.  If you need support or have questions, please [contact us](#contact-us).
-
-## How to gain access
-
-You have the option to request access to the API either as
-[an individual](#as-an-individual) or for [a group](#as-a-group-recommended).
-Choose the process that best aligns with your needs. Remember to note the email
-identifier for which you will be requesting access. It should be in one of these
-formats:
-
-*   YOUR-GROUP-NAME@YOUR-DOMAIN
-*   INDIVIDUAL-ID@YOUR-DOMAIN
-*   INDIVIDUAL-ID@gmail.com (not recommended for more involved research projects
-    at large organizations)
-
-### As a group (recommended)
-
-If your organization is a Google Workspace or Google Cloud Platform (GCP)
-customer, contact your Google admin and ask them to create a group with the list
-of individuals who will be using the API. Let them know that this group is used
-for contacting you and also as a security principal for authorizing your access
-to the API.
-
-![Create Google Group](img/create-group.png)
-
-Otherwise,
-[create a free Cloud Identity Account](https://cloud.google.com/identity/docs/set-up-cloud-identity-admin)
-for your domain name and in the process become the interim Google admin for your
-organization. Visit [Google Admin console](https://admin.google.com/) and create
-the above-mentioned group. If your individual identities are unknown to Google,
-they will need to follow the process for the [individuals](#as-an-individual)
-before you can add them to the group.
-
-### As an individual
-
-If your organization is a Google Workspace or GCP customer, identity federation
-is most likely set up between your corporate identity directory and
-[Google Identity and Access Management](https://cloud.google.com/security/products/iam)
-and therefore individuals already have Google identities in the form of their
-corporate emails. Check with your IT department to find out whether identity
-federation is already in place or will be established soon.
-
-Otherwise,
-[create a Google identity based on your email](https://accounts.google.com/signup/v2/webcreateaccount?flowName=GlifWebSignIn&flowEntry=SignUp).
-Opt for the "use my current email address instead" option, as shown in the
-screen capture below.
-
-IMPORTANT: You should choose a password that is different from your corporate
-password.
-
-![Create Google Id](img/create-identity.png)
-
-NOTE: If you want to sign up as an individual with a gmail account you don't
-need to create a Google identity and can skip the above step.
 
 ## Use our test data
 
 Upon gaining access to the API, you'll also have access to publicly available
 data we've curated specifically for testing. This is to help you get started
 with your initial experiments. The default state of the
-[demo ipynb](derm_foundation_demo.ipynb) is set to use this test data, which is
+[Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/derm-foundation/derm_foundation_demo.ipynb) is set to use this test data, which is
 stored in a
 [Cloud Storage (GCS) bucket](https://cloud.google.com/storage/docs/creating-buckets)
-managed by us for your convenience. As you become more familiar with the
-[demo ipynb](derm_foundation_demo.ipynb), you have the option to modify it to
-[work with your images](#use-your-own-images) stored in your own GCS bucket.
+managed by us for your convenience.
 
-## Use your own images
+## Use your own data
 
 WARNING: You hold responsibility for the data stored in your GCS bucket that you
-use with the API. It's important to comply with all the terms of use you agreed
-to upon signing up for access.
+use with the API. It's important to comply with all the terms of use any data is subject to.
 
-WARNING: If your organization is already a GCP user, ensure that you follow
-approved methods for creating a GCS bucket, uploading data and granting access
-to [your chosen identity](#how-to-gain-access), in line with your organization's
-data privacy and security policies. The instructions in this section should only
-be used if your organization's policies permit experimenting with de-identified
-data in an ungoverned GCS bucket. [Contact us](#contact-us) if you need help
-running the API within strict security perimeters of your organization.
-
-NOTE: The [demo ipynb](derm_foundation_demo.ipynb) demonstrates how to call the
+NOTE: The [Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/derm-foundation/derm_foundation_demo.ipynb) demonstrates how to call the
 API using short-lived access tokens. These tokens provide temporary access to
 the API for processing your images and are specific to the individual running
 the Colab. It's important to note that the API is stateless and does not store
@@ -141,6 +76,8 @@ the images it processes.
     [`rsync` command](https://cloud.google.com/sdk/gcloud/reference/storage/rsync)
     instead of `cp`.
 
+    You should also include a path to a CSV file in gcs_metadata_csv. This CSV should contain a column with the file_names of the images you're uploading, titled by default 'img_id' and a label column for the task you want to train on, titled by default 'diagnostic'. We have set these titles as parameters however so you can adjust them if you like when you adjust the Demo Notebook to match your CSV.
+
 1.  Make sure that [the email identity you selected](#how-to-gain-access) has
     the necessary permissions to view the images. The simplest method is to
     assign the predefined role of `roles/storage.objectViewer` to the chosen
@@ -149,9 +86,72 @@ the images it processes.
     You should familiarize yourself with
     [GCS access control](https://cloud.google.com/storage/docs/access-control).
 
-1.  Modify the [demo ipynb](derm_foundation_demo.ipynb) and replace the
-    `hai-cd3-foundations-dermatology` GCS bucket, which is where
-    [our test data](#use-our-test-data) resides, with your own bucket name.
+1.  Modify the [Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/derm-foundation/derm_foundation_demo.ipynb#scrollTo=OxzYsc8NDpwa) and replace the values for:
+    * gcp_project
+    * gcs_bucket_name
+    * gcs_metadata_csv
+    * gcs_image_dir (leave blank if the images are in the root directory); and
+    * label_column (the name of the columns for the label you're training for)
+    * img_join_column (the name of the column you want to join your image files on)
+
+    With the values from your GCS bucket.
+
+    Also make sure you uncheck the "gcs_use_precomputed embeddings" flag.
+
+## Access Options
+
+You have the option to request access to the API either as
+[an individual](#as-an-individual-non-gmail-account) or for [a group](#as-a-group-recommended).
+Choose the process that best aligns with your needs. Remember to note the email
+identifier for which you will be requesting access. It should be in one of these
+formats:
+
+*   YOUR-GROUP-NAME@YOUR-DOMAIN
+*   INDIVIDUAL-ID@YOUR-DOMAIN
+*   INDIVIDUAL-ID@gmail.com
+
+### As a group (recommended)
+
+If your organization is a Google Workspace or Google Cloud Platform (GCP)
+customer, contact your Google admin and ask them to create a group with the list
+of individuals who will be using the API. Let them know that this group is used
+for contacting you and also as a security principal for authorizing your access
+to the API.
+
+![Create Google Group](img/create-group.png)
+
+Otherwise,
+[create a free Cloud Identity Account](https://cloud.google.com/identity/docs/set-up-cloud-identity-admin)
+for your domain name and in the process become the interim Google admin for your
+organization. Visit [Google Admin console](https://admin.google.com/) and create
+the above-mentioned group. If your individual identities are unknown to Google,
+they will need to follow the process for the [individuals](#as-an-individual)
+before you can add them to the group.
+
+### As an individual (non-gmail account)
+This section applies for the INDIVIDUAL-ID@YOUR-DOMAIN case (e.g. `person@university.org` or `person@company.com`)
+
+If your organization is a Google Workspace or GCP customer, identity federation
+is most likely set up between your corporate identity directory and
+[Google Identity and Access Management](https://cloud.google.com/security/products/iam)
+and therefore individuals already have Google identities in the form of their
+corporate emails. Check with your IT department to find out whether identity
+federation is already in place or will be established soon.
+
+Otherwise,
+[create a Google identity based on your email](https://accounts.google.com/signup/v2/webcreateaccount?flowName=GlifWebSignIn&flowEntry=SignUp).
+Opt for the "use my current email address instead" option, as shown in the
+screen capture below.
+
+IMPORTANT: You should choose a password that is different from your corporate
+password.
+
+![Create Google Id](img/create-identity.png)
+
+### As an individual (`@gmail.com` account)
+
+If you want to sign up as an individual with a gmail account, you can submit the form directly with your gmail address.
+
 
 ## General notes
 
