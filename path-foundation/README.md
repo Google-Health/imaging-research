@@ -24,7 +24,7 @@ fill out the [API access form](http://bit.ly/fm-path-access-form).
 1.  Once access is granted, you’ll be notified via the provided email address
     and can start using the API.
 
-1. The [Demo Colab](https://colab.sandbox.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb) shows you how
+1. The [Demo Colab](https://research.colab.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb) shows you how
 to train a sample linear classifier. You can experiment with
 [our sample digitized pathology images & training labels](#use-our-test-data)
 to understand the API, then modify the Colab to use
@@ -45,7 +45,7 @@ involved and requires more advanced batching. We're happy to help!
 ## Use our test data
 
 Upon gaining access to the API, you'll also have access to publicly available
-data we've curated specifically for testing on the [Demo Colab](https://colab.sandbox.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb). This data comprises of DICOM images stored in a Google Cloud DICOM Store and training labels in PNG and JSON formats in a GCS bucket. The [Demo Colab](https://colab.sandbox.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb)
+data we've curated specifically for testing on the [Demo Colab](https://research.colab.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb). This data comprises of DICOM images stored in a Google Cloud DICOM Store and training labels in PNG and JSON formats in a GCS bucket. The [Demo Colab](https://research.colab.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb)
 uses this test data to train a tumor detector. 
 
 ## Use your own images
