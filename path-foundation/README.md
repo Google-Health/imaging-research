@@ -31,13 +31,15 @@ to understand the API, then modify the Colab to use
 [your own data](#use-your-own-data).
 
 The Colab includes instructions for:
-   * Generating training labels in JSON format from masks in PNG format.
-   * Generating a temporary access token for the API to read the DICOM images
-   from a [Cloud DICOM Store](https://cloud.google.com/healthcare-api/docs/concepts/dicom)
-   on behalf of the person running the Colab.
-   * Calling the API to train a linear classifier using images from a Cloud
-   DICOM store and training labels from a
-   [Cloud Storage (GCS) bucket](https://cloud.google.com/storage).
+
+* Generating training labels in JSON format from masks in PNG format.
+* Generating a temporary access token for the API to read the DICOM images
+from a [Cloud DICOM Store](https://cloud.google.com/healthcare-api/docs/concepts/dicom)
+on behalf of the person running the Colab.
+* Calling the API on WSI DICOMs stored in Cloud DICOM store to generate embeddings
+* Training a linear classifier using these embeddings and training labels from a
+[Cloud Storage (GCS) bucket](https://cloud.google.com/storage) and evaluating the result of this classifier.
+* An alternative way of calling the API to generate embeddings from digital pathology images (JPEG, TIFF or PNG) stored in GCS
 
 [Contact us](#contact) if you find training your custom model is more
 involved and requires more advanced batching. We're happy to help!
@@ -46,9 +48,9 @@ involved and requires more advanced batching. We're happy to help!
 
 Upon gaining access to the API, you'll also have access to publicly available
 data we've curated specifically for testing on the [Demo Colab](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb). This data comprises of DICOM images stored in a Google Cloud DICOM Store and training labels in PNG and JSON formats in a GCS bucket. The [Demo Colab](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/path-foundation/linear-classifier-demo.ipynb)
-uses this test data to train a tumor detector. 
+uses this test data to train a tumor detector.
 
-## Use your own images
+## Use your own data
 
 WARNING: You hold responsibility for the data stored in your GCS bucket that you
 use with the API. It's important to comply with all the terms of use any data is subject to.
