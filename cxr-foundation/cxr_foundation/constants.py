@@ -21,7 +21,7 @@ _EMBEDDINGS_PROJECT_NAME = 'gh-rad-validation-cxrembd-deid'
 _LOCATION = 'us-central1'
 
 # ID of the V1 embeddings endpoint.
-_V1_ENDPOINT_ID = 6695981832690728960
+_V1_ENDPOINT_ID = 8327848403333545984
 # IDs of the V2 embeddings endpoints.
 _V2_C_ENDPOINT_ID = 3169498397715464192
 _V2_B_ENDPOINT_ID = 2156540325277990912
