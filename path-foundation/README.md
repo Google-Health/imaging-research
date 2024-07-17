@@ -10,6 +10,8 @@ embeddings can be used to develop custom machine learning models for pathology
 use-cases using less data and compute compared to traditional model development
 methods.
 
+For more information please see this [video](https://www.youtube.com/watch?v=Q_09Kqv1y1E).
+
 You can read more about the research and underlying model in our
 manuscript:
 [Domain-specific optimization and diverse evaluation of self-supervised models for histopathology](https://arxiv.org/abs/2310.13259).
@@ -41,6 +43,7 @@ on behalf of the person running the Colab.
 [Cloud Storage (GCS) bucket](https://cloud.google.com/storage) and evaluating the result of this classifier.
 * An alternative way of calling the API to generate embeddings from digital pathology images (JPEG, TIFF or PNG) stored in GCS
 
+We have a [video walkthrough](https://www.youtube.com/watch?v=Q_09Kqv1y1E) of the demo if you'd like more information.
 [Contact us](#contact) if you find training your custom model is more
 involved and requires more advanced batching. We're happy to help!
 
