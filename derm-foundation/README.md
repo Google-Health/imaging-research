@@ -19,7 +19,7 @@ compared to traditional model development methods.
 1.  The [Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/derm-foundation/derm_foundation_demo.ipynb) shows you how to use the API to
     train a sample model [with our test data](#use-our-test-data). You can
     modify the Demo Notebook to train a model using
-    [your own images](#use-your-own-images). This Notebook provides an example of
+    [your own data](#use-your-own-data). This Notebook provides an example of
     the following steps:
 
     *   Generating a temporary access token to grant the API access to images in
