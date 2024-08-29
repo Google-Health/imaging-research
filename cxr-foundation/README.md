@@ -6,29 +6,39 @@
 
 1.  Fill out the [API access form](https://forms.gle/SJBSawfDw19JZRA59). Your provided Gmail account will be used for access once approved for non-clinical use.
 2.  Once granted you’ll get an email and can use the CXR Foundation API with your own images.
-3.  You also have access to this GitHub repository containing Python source code to:
+3.  If you want to get started in a no code environment please run our [GUI-based demo](https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb). This provides a web interface to:
+    * import your own images in DICOM format and view these with windowing options
+    * label them
+    * Retrieve embeddings
+    * Split data into train and eval sets
+    * Train a linear probe
+    * Evaluate performance on the eval set and pick an operating point
+    * Running in Colab this app will let you:
+We’ve also linked it directly to CXR-14 data, so you can try it out on public data as well. 
+6.  You also have access to this GitHub repository containing Python source code to:
     1. Convert DICOM images into PNGs suitable for calling CXR Foundation
     2. Call the API to generate embeddings from the PNG
-4.  [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and [log in](https://cloud.google.com/sdk/gcloud/reference/auth/login):
+7.  [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and [log in](https://cloud.google.com/sdk/gcloud/reference/auth/login):
 
         gcloud auth application-default login
 
-5.  Clone the Repository into a local directory
+8.  Clone the Repository into a local directory
 
         git clone https://github.com/Google-Health/imaging-research.git
         cd imaging-research/cxr-foundation
 
-6.  Install the CXR Foundation package:
+9.  Install the CXR Foundation package:
 
         pip install .
 
-7.  Run the CXR Foundation code:
+10.  Run the CXR Foundation code:
     1. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory.
     2. Generate and save embeddings.
     3. Read them and use them to train your model.
 
 See the notebooks for examples of how to use the embeddings service and this package.
 
+- [GUI-based demo](https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb) allows you to get started exploring embeddings really quickly. 
 - [CXR_Foundation_Demo.ipynb](./CXR_Foundation_Demo.ipynb) - Demonstrates how to use the CXR Foundation service to generate embeddings from DICOMs. Uses the generated embeddings in a model.
 - [MIMIC_Embeddings_Demo.ipynb](MIMIC_Embeddings_Demo.ipynb) - Uses the already generated embeddings from the [MIMIC CXR Embeddings Database](https://physionet.org/content/image-embeddings-mimic-cxr/1.0/) in a model.
 
