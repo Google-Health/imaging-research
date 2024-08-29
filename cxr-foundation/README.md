@@ -6,7 +6,7 @@
 
 1.  Fill out the [API access form](https://forms.gle/SJBSawfDw19JZRA59). Your provided Gmail account will be used for access once approved for non-clinical use.
 2.  Once granted you’ll get an email and can use the CXR Foundation API with your own images.
-3.  If you want to get started in a no code environment, please run our [GUI-based demo](https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb). This provides a web interface to:
+3.  If you want to get started in a no code environment, please run our [GUI-based demo](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb). This provides a web interface to:
     * import your own images in DICOM format and view these with windowing options
     * label them
     * Retrieve embeddings
@@ -38,7 +38,7 @@ We’ve also linked it directly to CXR-14 data, so you can try it out on public 
 
 See the notebooks for examples of how to use the embeddings service and this package.
 
-- [GUI-based demo](https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb) allows you to get started exploring embeddings really quickly. 
+- [GUI-based demo](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb) allows you to get started exploring embeddings really quickly. 
 - [CXR_Foundation_Demo.ipynb](./CXR_Foundation_Demo.ipynb) - Demonstrates how to use the CXR Foundation service to generate embeddings from DICOMs. Uses the generated embeddings in a model.
 - [MIMIC_Embeddings_Demo.ipynb](MIMIC_Embeddings_Demo.ipynb) - Uses the already generated embeddings from the [MIMIC CXR Embeddings Database](https://physionet.org/content/image-embeddings-mimic-cxr/1.0/) in a model.
 
