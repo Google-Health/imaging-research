@@ -15,23 +15,23 @@
     * Evaluate performance on the eval set and pick an operating point
     * Running in Colab this app will let you:
 We’ve also linked it directly to CXR-14 data, so you can try it out on public data as well. 
-6.  You also have access to this GitHub repository containing Python source code to:
+4.  You also have access to this GitHub repository containing Python source code to:
     1. Convert DICOM images into PNGs suitable for calling CXR Foundation
     2. Call the API to generate embeddings from the PNG
-7.  [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and [log in](https://cloud.google.com/sdk/gcloud/reference/auth/login):
+5.  [Install the gcloud CLI](https://cloud.google.com/sdk/docs/install) and [log in](https://cloud.google.com/sdk/gcloud/reference/auth/login):
 
         gcloud auth application-default login
 
-8.  Clone the Repository into a local directory
+6.  Clone the Repository into a local directory
 
         git clone https://github.com/Google-Health/imaging-research.git
         cd imaging-research/cxr-foundation
 
-9.  Install the CXR Foundation package:
+7.  Install the CXR Foundation package:
 
         pip install .
 
-10.  Run the CXR Foundation code:
+8.  Run the CXR Foundation code:
     1. Upload your chest x-ray DICOMs or PNGs to a cloud bucket or use a local directory.
     2. Generate and save embeddings.
     3. Read them and use them to train your model.
