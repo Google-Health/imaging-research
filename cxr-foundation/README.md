@@ -6,7 +6,7 @@
 
 1.  Fill out the [API access form](https://forms.gle/SJBSawfDw19JZRA59). Your provided Gmail account will be used for access once approved for non-clinical use.
 2.  Once granted you’ll get an email and can use the CXR Foundation API with your own images.
-3.  If you want to get started in a no code environment please run our [GUI-based demo](https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb). This provides a web interface to:
+3.  If you want to get started in a no code environment, please run our [GUI-based demo](https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/CXR_Foundation_Interactive_Demo.ipynb). This provides a web interface to:
     * import your own images in DICOM format and view these with windowing options
     * label them
     * Retrieve embeddings
