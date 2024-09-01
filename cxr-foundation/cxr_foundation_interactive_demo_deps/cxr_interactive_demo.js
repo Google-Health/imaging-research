@@ -197,7 +197,7 @@ function createViewerElement(index, name, label) {
   span.className = 'badge dataset training';
   containerDiv.appendChild(span);
   containerDiv.fileName = name;
-  containerDiv.title = name + "\\nWindow with left mouse button. Pan with middle. Zoom with right.";
+  containerDiv.title = name + "\nWindow with left mouse button. Pan with middle. Zoom with right.";
   viewersContrainerEl.appendChild(containerDiv);
   cornerstone.enable(viewerDiv);
   return viewerDiv;
@@ -297,7 +297,7 @@ function downloadCSV() {
   var children = document.getElementById('dicomImage').children;
   for (var i = 0; i < children.length; i++) {
     const c = children[i];
-    csv += c.fileName + ',' + c.classList.contains('positive') + '\\n';
+    csv += c.fileName + ',' + c.classList.contains('positive') + '\n';
   }
   downloadStringAsFile('labes.csv', csv);
 }
@@ -472,12 +472,12 @@ async function trainModel() {
 }
 
 function downloadRawResults() {
-  let csv = `dataset,filename,label,score\\n`;
+  let csv = `dataset,filename,label,score\n`;
   evaluationIndices.map((i) => resultsArr[i]).forEach((r) => {
-    csv = csv + `eval,${r.fileName},${r.label},${r.score}\\n`;
+    csv = csv + `eval,${r.fileName},${r.label},${r.score}\n`;
   });
   trainingIndices.map((i) => resultsArr[i]).forEach((r) => {
-    csv = csv + `training,${r.fileName},${r.label},${r.score}\\n`;
+    csv = csv + `training,${r.fileName},${r.label},${r.score}\n`;
   });
 
   downloadStringAsFile('predictions.csv', csv);
@@ -812,7 +812,7 @@ async function fetchCXR14Dataset(diagnosis, limit) {
  * @return {!Array<!Object>} The processed CSV text as an array of objects.
  */
 function processCsv(csvText) {
-  const lines = csvText.split('\\n');
+  const lines = csvText.split('\n');
   const headers = lines[0].split(',');
 
   return lines.slice(1).map(line => {
