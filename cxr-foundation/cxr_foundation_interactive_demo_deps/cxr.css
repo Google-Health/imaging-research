@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: 'Roboto', sans-serif; /* Changed to Roboto */
+  font-family: 'Roboto', sans-serif;
   font-size: 16px; 
   line-height: 1.6; 
   color: var(--text-color); 
@@ -13,7 +13,7 @@ body {
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none;    /* Firefox */
   -ms-user-select: none;     /* Internet Explorer/Edge */
-  user-select: none;         /* Non-prefixed version, supported by modern browsers */
+  user-select: none;         /* Supported by modern browsers */
 }
 
 .container {
@@ -22,10 +22,8 @@ body {
   align-items: center;
 }
 
-
-/* Headings */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto', sans-serif; /* Changed to Roboto */
+  font-family: 'Roboto', sans-serif;
   font-weight: bold;
   margin-bottom: 1rem; 
 }
@@ -39,8 +37,7 @@ button {
   border-width: 1px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease; /* Smooth background color transition on hover   
-*/
+  transition: background-color 0.3s ease;
 }
 
 .module {
@@ -116,7 +113,7 @@ display: flex;
 }
 
 #selectFile::before {
-  content: 'Choose Files'; /* Updated text to reflect multiple selection */
+  content: 'Choose Files';
   display: inline-block;
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
@@ -144,9 +141,9 @@ h1 { font-size: 2.5rem; }
 
 .viewer-container:has(.popup) {
 background-image: linear-gradient(
-  45deg,             /* Direction of the gradient */
-  black,             /* Start color */
-  gray               /* End color */
+  45deg,
+  black,
+  gray
 );
 
 }
@@ -183,7 +180,7 @@ background-image: linear-gradient(
     right: 5px;
 }
 
-/* hide zoom buttons of other iamges */
+/* hide zoom buttons of other images */
 .childPopup :not(.popup) > .zoomButton {
   display: none;
 }
@@ -333,11 +330,11 @@ background-image: linear-gradient(
 .embedding::before {
   content: "✅";
   position: absolute;
-  bottom: 10px; /* Adjust these values based on your needs */
+  bottom: 10px;
   left: 10px;
   width: 20px;
   height: 20px;
-  animation: moveToCorner 1s ease-in-out forwards; /* Apply the animation */
+  animation: moveToCorner 1s ease-in-out forwards;
   z-index: 1;
   color: lightyellow;
 }
@@ -523,7 +520,6 @@ color: #999;
 }
 
 /**** tabs ****/
-
 .tabs {
     width: 100%;
 }

@@ -197,7 +197,7 @@ function createViewerElement(index, name, label) {
   span.className = 'badge dataset training';
   containerDiv.appendChild(span);
   containerDiv.fileName = name;
-  containerDiv.title = name + "\\nWindow with left mouse button. Pad with middle. Zoom with right.";
+  containerDiv.title = name + "\\nWindow with left mouse button. Pan with middle. Zoom with right.";
   viewersContrainerEl.appendChild(containerDiv);
   cornerstone.enable(viewerDiv);
   return viewerDiv;
