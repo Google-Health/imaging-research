@@ -1,0 +1,595 @@
+:root {
+  --text-color: rgb(67 80 102);
+  --body-bg: #f8f9fa;
+  --border: #ced4da;
+}
+
+body {
+  font-family: 'Roboto', sans-serif; /* Changed to Roboto */
+  font-size: 16px; 
+  line-height: 1.6; 
+  color: var(--text-color); 
+  background-color: var(--body-bg);
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* Internet Explorer/Edge */
+  user-select: none;         /* Non-prefixed version, supported by modern browsers */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto', sans-serif; /* Changed to Roboto */
+  font-weight: bold;
+  margin-bottom: 1rem; 
+}
+
+button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  text-align: center;
+  text-decoration: none;
+  border-width: 1px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth background color transition on hover   
+*/
+}
+
+.module {
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  margin: 25px;
+  padding: 15px;
+  width: fit-content;
+display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.terminology-inputs {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.terminology-label {
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  margin: 5px;
+  align-items: center;
+}
+
+.terminology-label span {
+  font-size: 12px;
+}
+
+.terminology-label input[type="text"] {
+  margin-top: 5px;
+  padding: 5px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  background-color: #eee;
+  text-align: center;
+}
+
+.module.dataset {
+    width: 500px
+}
+
+.module.dataset #loadDatasetButton {
+    padding: 3px;
+}
+
+#selectFile {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  margin-top: 30px;
+}
+
+#selectFile:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+#selectFile::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+#selectFile::before {
+  content: 'Choose Files'; /* Updated text to reflect multiple selection */
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1.5;
+  color: buttontext;
+  background-color: buttonface;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+#selectFile:hover::before {
+  background-color: #0056b3;
+}
+
+h1 { font-size: 2.5rem; }
+
+.viewer-container {
+  width: 300px;
+  height: 300px;
+  margin: 3px;
+}
+
+.viewer-container:has(.popup) {
+background-image: linear-gradient(
+  45deg,             /* Direction of the gradient */
+  black,             /* Start color */
+  gray               /* End color */
+);
+
+}
+.viewer {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  cursor: crosshair;
+}
+
+.zoomButton {
+  position: absolute;
+  color: white;
+  text-shadow: -1px -1px 0 #000;
+
+  width: 15px;
+  height: 15px;
+  bottom: 10px;
+  right: 5px;
+}
+
+.popup .zoomButton {
+    top: 0px;
+    right: 0px;
+    visibility: hidden;
+}
+
+.popup .zoomButton::before {
+    visibility:visible;
+    position: absolute;
+    color: white;
+    content: '✕';
+    z-index: 5;
+    right: 5px;
+}
+
+/* hide zoom buttons of other iamges */
+.childPopup :not(.popup) > .zoomButton {
+  display: none;
+}
+
+#backdrop {
+  position: fixed;
+  background-color: #000;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;  
+}
+
+#backdrop:has(+.childPopup) {
+  position: fixed;
+  background-color: #000;
+  opacity: .6;
+  transition: opacity 0.5s ease;
+  z-index: 3;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(2);
+  z-index: 3;
+}
+
+.viewList {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+
+.badge {
+  position: absolute;
+  padding: 0px 5px;
+  border-radius: 12px;
+  color: black;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  display: none;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.image-loader-container {
+  display: inline-block;
+}
+
+.badge-in-text {
+  position: unset;
+  display: inline-flex;
+  vertical-align: middle;
+  margin: 0 3px;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.badge.ai {
+  top: 30px;
+  left: 5px;
+  background: grey;
+}
+
+.ai-positive .badge.ai {
+  background-color: #f0ad4e;
+  display: block;
+}
+
+.ai-negative .badge.ai {
+  background-color: #d3d3d3;
+  display: block;
+}
+
+.ai-negative.positive .badge.ai {
+  color: red;
+}
+
+.negative.ai-positive .badge.ai {
+  color: red;
+}
+
+
+.badge.ai::before {
+  content: "AI: ";
+}
+
+
+.badge.gt {
+  top: 5px;
+  left: 5px;
+  background: grey;
+
+}
+
+.positive .badge.gt {
+  background-color: #f0ad4e;
+  display: block;
+}
+
+.negative .badge.gt {
+  background-color: #d3d3d3;
+  display: block;
+}
+
+.badge.gt::before {
+  content: "GT: ";
+}
+
+.badge.dataset {
+  top: 3px;
+  right: 3px;
+  border-radius: 2px;
+  color: white;
+}
+
+.training .badge.dataset {
+  background: #5bc0de;
+  display: block;
+}
+
+.training .badge.dataset::before {
+  content: "training set";
+}
+
+.eval .badge.dataset {
+  background: #5cb85c;
+  display: block;
+}      
+
+.eval .badge.dataset::before {
+  content: "eval set";
+}
+
+.badge-in-text .badge {
+  position: unset;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+}
+
+.embedding::before {
+  content: "✅";
+  position: absolute;
+  bottom: 10px; /* Adjust these values based on your needs */
+  left: 10px;
+  width: 20px;
+  height: 20px;
+  animation: moveToCorner 1s ease-in-out forwards; /* Apply the animation */
+  z-index: 1;
+  color: lightyellow;
+}
+
+@keyframes moveToCorner {
+  from {
+      bottom: 50%;
+      left: 50%;
+      scale: 3;
+      opacity: 1;
+  }
+  to {
+      bottom: 8px;
+      left: 5px;
+      scale: 1;
+      opacity: 0.7;
+  }
+}
+
+.positive {
+position: relative;
+}
+
+.negative {
+position: relative;
+}
+
+.toggleButton {
+  height: 12px;
+  position: absolute;
+  top: 3px;
+  left: 90px;
+  cursor: alias;
+  font-size: 1rem;
+}
+
+#toast-container {
+position: fixed;
+top: 10px;
+right: 10px;
+z-index: 9999;
+}
+
+.toast {
+background-color: #FF5F6D;
+color: white;
+padding: 10px 20px;
+margin-top: 10px;
+border-radius: 5px;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+}
+
+.center-child {
+  position: relative;
+}
+
+.loader {
+  position: fixed;
+  left: 50%;
+  bottom: 2em;
+  font-size:48px;
+  color: #F00;
+  width: 1em;
+  height: 1em;
+  box-sizing: border-box;
+  border-radius: 50%;
+  transform: translateX(-50%) rotateX(-60deg) perspective(1000px);
+}
+.loader:before,
+.loader:after {
+  content: '';
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  animation: flowerFlow 1s ease-out infinite;
+}
+.loader:after {
+  animation-delay: .4s;
+}
+
+@keyframes flowerFlow {
+  0% {
+      opacity: 1;
+      transform: rotate(0deg);
+      box-shadow: 0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor,
+      0 0 0 -.5em currentcolor;
+  }
+  100% {
+      opacity: 0;
+      transform: rotate(180deg);
+      box-shadow: -1em -1em 0 -.35em currentcolor,
+      0 -1.5em 0 -.35em currentcolor,
+      1em -1em 0 -.35em currentcolor,
+      -1.5em 0 0 -.35em currentcolor,
+      1.5em -0 0 -.35em currentcolor,
+      -1em 1em 0 -.35em currentcolor,
+      0 1.5em 0 -.35em currentcolor,
+      1em 1em 0 -.35em currentcolor;
+  }
+}
+
+.thumbnail {
+  width: 100px;
+  margin: 1px;
+}
+
+.loading {
+  animation: pulse 2.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+      background-color: white;
+  }
+  50% {
+      background-color: yellow;
+  }
+}
+
+.loaded::before {
+content:'[add icon symbol here]';
+display:inline-block;
+vertical-align: top;
+line-height: 1em;
+width: 1em;
+height:1em;
+margin-right: 0.3em;
+text-align: center;
+color: #999;
+
+}
+
+.step3 {
+  position: fixed;
+  right: 0px;
+  bottom: 10px;
+  background: lightskyblue;
+  opacity: 90%;
+  padding: 10px;
+  border-color: black;
+  border-width: 1px;
+  border-style: solid;
+  z-index: 2;
+}
+
+.step3-container {
+  display: flex;
+  justify-content: space-between;
+  height: 300px;
+  width: 100%;
+  flex-direction: row;
+}
+
+.vflex {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#metrics p {
+  margin: 0;
+}
+
+.verticalSeperator {
+  width: 10px; margin: 10px 50px; background-color: gray;
+}
+
+.verticalSeperator:has(+ div[style*="display: none"]) {
+  display: none;
+}
+
+/**** tabs ****/
+
+.tabs {
+    width: 100%;
+}
+
+.tabs .content {
+    display: none;
+    opacity: 0;
+    padding: 20px;
+    border-top: 2px solid var(--border);
+}
+
+.tabs input[type='radio'] {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.tabs label {
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: 30px;
+    background-color: #eee;
+    border-style: solid solid none solid;
+    border-width: 2px;
+    border-color: transparent;
+    border-radius: 5px 5px 0 0;
+    padding: 0 4px;
+}
+
+#tab1:checked+label {
+    border-color: var(--border);
+}
+
+#tab2:checked+label {
+    border-color: var(--border);
+}
+
+#tab1:checked~#content1 {
+    display: block;
+    width: unset;
+    opacity: 1;
+}
+
+#tab2:checked~#content2 {
+    display: block;
+    width: unset;
+    opacity: 1;
+}
+
+.fullscreenNote {
+  position: fixed;
+  top: 5px;
+  animation: disappear 0s ease-in 5s forwards;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  color: yellow;
+}
+
+@keyframes disappear {
+    to {
+      opacity: 0;
+      height: 0;
+      width: 0;
+    }
+}
