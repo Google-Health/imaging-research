@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wzwz1/imaging-research@patch-3/cxr-foundation/cxr_foundation_interactive_demo_deps/cxr.css">
+</head>
+<body>
+<div class="fullscreenNote">⭅ Click here for fullscreen<br>
+    <img src="https://cdn.jsdelivr.net/gh/wzwz1/imaging-research@patch-3/cxr-foundation/cxr_foundation_interactive_demo_deps/fullscreen.gif">
+</div>
+<div class="container">
+    <img style="max-width: 50%" src="https://raw.githubusercontent.com/Google-Health/imaging-research/master/cxr-foundation/logo.png">
+    <h1>CXR Train Classifer Over Embeddings</h1>
+    <div>
+    This model is working on a endpoint from the <a href="https://github.com/Google-Health/imaging-research/blob/master/cxr-foundation/README.md">CXR foundations</a>, please sign up before using.
+    </div>
+    <div class="module">
+        <b>Enter your label terminology:</b>
+        <div class="terminology-inputs">
+            <label class="terminology-label">
+                <span>Positive</span>
+                <input type="text" name="1" value="present" maxlength="10" oninput="updateTerminology(this)"/>
+            </label>
+            <label class="terminology-label">
+                <span>Negative</span>
+                <input type="text" name="0" value="absent" maxlength="10" oninput="updateTerminology(this)"/>
+            </label>
+        </div>
+    </div>
+    <div class="module dataset">
+        <b>Dataset to use:</b>
+        <div class="tabs">
+            <input type="radio" name="tab" id="tab1" checked>
+            <label for="tab1">NIH Chest X-ray14</label>
+            <input type="radio" name="tab" id="tab2">
+            <label for="tab2">Upload DICOM</label>
+            <div class="content" id="content1">
+                The NIH ChestX-ray14 dataset, consists of over 100,000 de-identified images of chest x-rays, with fourteen common disease labels, text-mined from the text radiological reports via NLP techniques.
+                <select id="diagnosis-cxr14"
+                onchange="const b = document.getElementById('loadDatasetButton'); b.disabled=!this.value; b.value=this.value">
+                    <option value="">Choose a diagnosis</option>
+                </select>
+                <button id="loadDatasetButton" disabled onclick="clearDicoms();fetchCXR14Dataset(this.value,40)">Load</button>
+            </div>
+            <div class="content" id="content2">
+
+    <div class="image-loader-container">
+
+            <span>Select multiple CXR DICOM P10 files on your local file system.</span>
+            Loaded image will be marked by default as:
+            <div id="defaultLabel" class="negative badge-in-text" style="height:20px"
+            onclick='posNegBadgeToggler(this.firstElementChild,terminologyTags,this,gtCssClassMatchingTermonology);'>
+                <div class="badge gt">absent</div>
+                🔄
+                (click to toggle)
+            </div>
+    </div>
+    <input type="file" id="selectFile" multiple></div>
+        </div>
+    </div>
+
+
+    <span>You can adjust image labels by clicking the tags
+        <div class="positive badge-in-text"><div class="badge gt">present</div></div> and
+        <div class="negative badge-in-text"><div class="badge gt">absent</div></div> by clicking the GT badge.</span>
+    <br><br>
+        <div
+                oncontextmenu="return false"
+                class='disable-selection noIbar'
+                unselectable='on'
+                onselectstart='return false;'
+                onmousedown='return false;'>
+            <div id='backdrop'></div>
+            <div id="dicomImage" class="viewList">
+            </div>
+        </div>
+    <br>
+    <div id="step2" style="display: none;">
+        <button onclick="clearDicoms()">Clear All</button>
+        <button id="downloadCSVButton" onclick="downloadCSV()">Save labels as CSV</button>
+        <button id="embeddingsButton" onclick="waiting(true); computeEmbeddings()">Compute Embeddings</button>
+        <label>
+        <input type="checkbox" id="cacheToggle" checked>
+        Cache embeddings (assumes file names are unique)
+        </label>
+    </div>
+    <br>
+    <div id="commentEl"></div>
+    <div id="step3" class="step3" style="display: none;">
+        <div class="step3-container">
+            <div class="vflex" style="width: 200px">
+                <span style="font-weight: 900;">Model Training</span>
+                <span>% of as training set out of the loaded data. Notice the
+                    <div class="training badge-in-text"><div class="badge dataset"></div></div> and
+                    <div class="eval badge-in-text"><div class="badge dataset"></div></div> badges on the images as you change the percentage.</span>
+                <div>
+                    <input type="range" min="0" max="100" value="50" id="trainingSetPct">
+                    <span id="trainingSetPctShow">50%</span>
+                </div>
+                <button id="trainButton" onclick="trainModel()" style="margin-top: auto">Train Model</button>
+                <button id="downloadButton" onclick="downloadModel()" style="margin-top: auto; display: none">Download Model</button>
+            </div>
+            <div class="verticalSeperator"></div>
+                <div id="predictionNotes" style="display: none">
+                    <div class="vflex" style="height: 100%">
+                        <div class="vflex">
+                            <span style="font-weight: 900;">Eval</span>
+                            <span>Threshold</span>
+                            <input type="range" min="0" max="1" value="0.5" step="0.01" id="threshold">
+                        </div>
+                        <div id="metrics"></div>
+                        <button onclick="downloadRawResults()" style="margin-top: auto">Download Raw</button>
+                    </div>
+                 </div>
+                <canvas id="rocChart" height="100%" style="display: none"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<br><br><br><br>
+<div id='toast-container'></div>
+<div class="center-child"><span id='spinner'></span></div>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/cornerstone-core@latest/dist/cornerstone.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cornerstone-math@latest/dist/cornerstoneMath.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cornerstone-tools@2.0.0/dist/cornerstoneTools.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cornerstone-wado-image-loader@latest/dist/cornerstoneWADOImageLoader.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dicom-parser@latest/dist/dicomParser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript">let accessToken = "ACCESS_TOKEN"</script>
+<script src="https://cdn.jsdelivr.net/gh/wzwz1/imaging-research@patch-3/cxr-foundation/cxr_foundation_interactive_demo_deps/cxr_interactive_demo.js"></script>
+</html>
