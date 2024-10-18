@@ -217,7 +217,7 @@ the preprint [manuscript](https://arxiv.org/abs/2310.13259).
 
 ### License
   Research use only. Not suitable for product development.
-  - See [Path Foundation - Additional Terms of Service](https://docs.google.com/forms/d/1auyo2VkzlzuiAXavZy1AWUyQHAqO7T3BLK-7ofKUvug/viewform?edit_requested=true).
+  - See [Path Foundation - Additional Terms of Service](https://docs.google.com/forms/d/1auyo2VkzlzuiAXavZy1AWUyQHAqO7T3BLK-7ofKUvug/viewform).
 
 ### Manuscript
   https://arxiv.org/abs/2310.13259
