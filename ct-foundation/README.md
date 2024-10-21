@@ -8,6 +8,15 @@ These embeddings can be used to develop custom machine learning models for task
 specific use-cases using less data and compute compared to traditional model
 development methods.
 
+If you use any part of CT Foundation or this repository, please cite our paper:
+
+@article{yang2024advancing,
+  title={Advancing multimodal medical capabilities of Gemini},
+  author={Yang, Lin and Xu, Shawn and Sellergren, Andrew and Kohlberger, Timo and Zhou, Yuchen and Ktena, Ira and Kiraly, Atilla and Ahmed, Faruk and Hormozdiari, Farhad and Jaroensri, Tiam and others},
+  journal={arXiv preprint arXiv:2405.03162},
+  year={2024}
+}
+
 ## How to use the CT Foundation API
 
 1.  Decide if you want to get access as an individual or a group. For more
