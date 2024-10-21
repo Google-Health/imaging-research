@@ -283,8 +283,8 @@ Research use only. Not suitable for product development. - See
 
 ### Training Data
 
-A comprehensive private dataset comprising 753,247 CT studies with associated
-radiology reports from 615,384 patients was obtained from three major hospital
+A comprehensive private dataset comprising 527,078 CT studies with associated
+radiology reports from 430,772 patients was obtained from three major hospital
 regions in the United States.
 
 ### Validation
