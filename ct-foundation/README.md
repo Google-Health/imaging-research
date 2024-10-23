@@ -10,13 +10,14 @@ development methods.
 
 If you use any part of CT Foundation or this repository, please cite our paper:
 
+```
 @article{yang2024advancing,
   title={Advancing multimodal medical capabilities of Gemini},
   author={Yang, Lin and Xu, Shawn and Sellergren, Andrew and Kohlberger, Timo and Zhou, Yuchen and Ktena, Ira and Kiraly, Atilla and Ahmed, Faruk and Hormozdiari, Farhad and Jaroensri, Tiam and others},
   journal={arXiv preprint arXiv:2405.03162},
   year={2024}
 }
-
+```
 ## How to use the CT Foundation API
 
 1.  Decide if you want to get access as an individual or a group. For more
@@ -236,6 +237,23 @@ but not limited to:
     -   Governing your data in GCS
     -   Training and serving custom models at scale on
         [Vertex AI](https://cloud.google.com/vertex-ai?hl=en)
+
+## Data Attribution
+
+The included demo notebook makes use of two public datasets provided by the Cancer Imaging Archive which is managed by the United States  National Cancer Institute
+
+###  NLST Radiology CT Images CC BY 4.0
+[https://www.cancerimagingarchive.net/collection/nlst/](https://www.cancerimagingarchive.net/collection/nlst/)
+
+#### NLST Data Citation
+ National Lung Screening Trial Research Team. (2013). Data from the National Lung Screening Trial (NLST) [Data set]. The Cancer Imaging Archive. https://doi.org/10.7937/TCIA.HMQ8-J677
+### LIDC-IDRI Data Access CC BY 3.0
+https://www.cancerimagingarchive.net/collection/lidc-idri/
+
+#### LIDC-IDRI Data Citation
+
+Armato III, S. G., McLennan, G., Bidaut, L., McNitt-Gray, M. F., Meyer, C. R., Reeves, A. P., Zhao, B., Aberle, D. R., Henschke, C. I., Hoffman, E. A., Kazerooni, E. A., MacMahon, H., Van Beek, E. J. R., Yankelevitz, D., Biancardi, A. M., Bland, P. H., Brown, M. S., Engelmann, R. M., Laderach, G. E., Max, D., Pais, R. C. , Qing, D. P. Y. , Roberts, R. Y., Smith, A. R., Starkey, A., Batra, P., Caligiuri, P., Farooqi, A., Gladish, G. W., Jude, C. M., Munden, R. F., Petkovska, I., Quint, L. E., Schwartz, L. H., Sundaram, B., Dodd, L. E., Fenimore, C., Gur, D., Petrick, N., Freymann, J., Kirby, J., Hughes, B., Casteele, A. V., Gupte, S., Sallam, M., Heath, M. D., Kuhn, M. H., Dharaiya, E., Burns, R., Fryd, D. S., Salganicoff, M., Anand, V., Shreter, U., Vastagh, S., Croft, B. Y., Clarke, L. P. (2015). Data From LIDC-IDRI [Data set]. The Cancer Imaging Archive. https://doi.org/10.7937/K9/TCIA.2015.LO9QL9SX
+
 
 # Model Card for CT Foundation
 
