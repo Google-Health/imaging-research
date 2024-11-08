@@ -30,7 +30,7 @@ If you use any part of CT Foundation or this repository, please cite our paper:
     and can start using the API.
 
 1.  Use the
-    [Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/ct-foundation/CT_Foundation_Demo.ipynb)
+    [Demo Notebook](https://colab.research.google.com/github/google-health/imaging-research/blob/master/ct-foundation/CT_Foundation_Demo.ipynb)
     to see how to use the API to compute embeddings and how to train a sample
     classifier. You can experiment with
     [our sample CT images & training labels](#use-our-test-data) to understand
@@ -59,7 +59,7 @@ dataset stored in a
 [Google Cloud DICOM Store](https://cloud.google.com/healthcare-api/docs/concepts/dicom).
 We also store pre-computed embeddings run on CT Foundation from
 [NLST](https://www.cancerimagingarchive.net/collection/nlst/) Our
-[Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/ct-foundation/CT_Foundation_Demo.ipynb)
+[Demo Notebook](https://colab.research.google.com/github/google-health/imaging-research/blob/master/ct-foundation/CT_Foundation_Demo.ipynb)
 shows you how to call CT Foundation on the LIDC_IDRI DICOMS and also how to
 train a performant model using the precomputed NLST embeddings.
 
@@ -137,7 +137,7 @@ To use your own data with the API, you will need the following GCP resources:
     to bulk import DICOM files from the GCS bucket to your Cloud DICOM Store.
 
 1.  Modify the
-    [Demo Notebook](https://colab.research.google.com/github/Google-Health/imaging-research/blob/master/ct-foundation/CT_Foundation_Demo.ipynb)
+    [Demo Notebook](https://colab.research.google.com/github/google-health/imaging-research/blob/master/ct-foundation/CT_Foundation_Demo.ipynb)
     to point to your data:
 
 1.  If storing your labels in GCS replace `hai-cd3-foundations-ct3d-vault-entry`
